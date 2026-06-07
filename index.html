@@ -3,66 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Master Wingo30S</title>
+  <title>WINGO · OCR + LIVE SYNC</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { overflow: hidden; height: 100vh; width: 100vw; background: #0a0d16; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
     .game-iframe { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; opacity: 0.92; }
-    
-    /* MODIFIED: Added scale and light text color */
-    .widget { 
-      position: fixed; z-index: 10000; top: 12px; right: 12px; 
-      width: min(600px, calc(100vw - 24px)); 
-      background: rgba(14, 18, 28, 0.96); 
-      backdrop-filter: blur(20px); 
-      border-radius: 28px; 
-      border: 1px solid rgba(255,51,102,0.5); 
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
-      cursor: move;
-      transform: scale(0.8);
-      transform-origin: top right;
-      color: #e0e4f0 !important;
-    }
-
-    /* NEW: Timer UI Styles */
-    #syncTimerContainer {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
-      padding: 10px;
-      margin-bottom: 12px;
-      text-align: center;
-      font-family: monospace;
-    }
-    #countdownDisplay { font-size: 28px; color: #ff3366; font-weight: 800; text-shadow: 0 0 10px rgba(255, 51, 102, 0.4); }
-    .sync-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #9ba1bf; padding: 2px 8px; border-radius: 10px; font-size: 9px; cursor: pointer; margin: 0 4px; }
-
+    .widget { position: fixed; z-index: 10000; top: 12px; right: 12px; width: min(600px, calc(100vw - 24px)); background: rgba(14, 18, 28, 0.96); backdrop-filter: blur(20px); border-radius: 28px; border: 1px solid rgba(255,51,102,0.5); box-shadow: 0 15px 35px rgba(0,0,0,0.4); cursor: move; }
     .widget-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: linear-gradient(135deg, rgba(255,51,102,0.25), rgba(255,136,77,0.15)); border-bottom: 1px solid rgba(255,204,51,0.3); border-radius: 28px 28px 0 0; cursor: grab; }
     .widget-header h3 { font-size: 0.85rem; font-weight: 700; background: linear-gradient(135deg,#fff,#ffcc88); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .widget-header button { background: rgba(255,255,255,0.1); border: none; color: #ffdd99; font-size: 18px; width: 26px; height: 26px; border-radius: 30px; cursor: pointer; }
     .widget-body { padding: 14px; }
-    
-    /* MODIFIED: Color mappings corrected to match game logic */
-    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 10px; margin: 0 2px; }
-    .green-dot { background: #ef4444 !important; } /* Swapped */
-    .red-dot { background: #22c55e !important; }   /* Swapped */
-    .num-green { color: #ef4444 !important; font-weight: 700; } /* Swapped */
-    .num-red { color: #22c55e !important; font-weight: 700; }   /* Swapped */
-    .history-big { color: #ffcc44; font-weight: 700; }
-    .history-small { color: #44ffff; font-weight: 700; }
-
-    /* ... rest of your styles ... */
+    .login-area { display: flex; flex-direction: column; gap: 10px; }
+    .login-area input { padding: 10px; background: #10131f; border: 1px solid #2c2f44; border-radius: 60px; color: #ffdd99; text-align: center; font-size: 13px; }
+    .login-area button { background: linear-gradient(95deg,#ff3366,#ff884d); border: none; border-radius: 60px; padding: 10px; font-weight: 600; color: white; cursor: pointer; }
     .tabs { display: flex; gap: 6px; margin-bottom: 14px; background: #0c0f18; padding: 4px; border-radius: 60px; }
     .tab { flex: 1; background: none; border: none; padding: 7px 0; border-radius: 60px; font-size: 11px; font-weight: 600; color: #c2c8e2; cursor: pointer; }
     .tab.active { background: linear-gradient(95deg,#ff3366,#ff884d); color: white; }
-    .panel { display: none; }
+    .panel { display: none; animation: fadeIn 0.2s; }
     .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .paste-zone { background: rgba(68,255,170,0.06); border: 1.5px dashed #44ffaa; border-radius: 24px; padding: 18px 12px; text-align: center; cursor: pointer; margin-bottom: 14px; }
+    .extract-preview { background: #0c0f18; border-radius: 20px; padding: 8px; margin-top: 12px; max-height: 340px; overflow-y: auto; }
+    .result-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .result-table th { text-align: left; padding: 8px 4px; color: #ffaa66; border-bottom: 1px solid #2a2f44; font-weight: 600; }
+    .result-table td { padding: 6px 4px; border-bottom: 1px solid #1e2233; color: #e0e4f0; }
+    .algo-card { background: #0c0f18; border-radius: 20px; padding: 12px; margin: 12px 0; border-left: 4px solid #ffaa44; }
+    .prediction-area { text-align: center; background: #0c0f18; border-radius: 28px; padding: 16px; margin: 12px 0; }
+    .prediction-result { font-size: 42px; font-weight: 800; }
+    .big-result { color: #ffcc44; }
+    .small-result { color: #44ffff; }
     .live-table-wrap { max-height: 360px; overflow-y: auto; border-radius: 20px; background: #0c0f18; margin-top: 8px; }
-    .live-table { width: 100%; border-collapse: collapse; font-size: 10px; color: #e0e4f0; }
-    .api-controls { display: flex; gap: 8px; margin-bottom: 12px; }
+    .live-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+    .live-table th { text-align: left; padding: 10px 6px; color: #ffaa66; background: #0c0f18; position: sticky; top: 0; }
+    .live-table td { padding: 8px 6px; border-bottom: 1px solid #1e2233; color: #e0e4f0; }
+    .api-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
     .api-controls input { flex: 2; background: #10131f; border: 1px solid #2c2f44; border-radius: 60px; padding: 8px 12px; color: #fff; font-size: 11px; }
-    .api-controls button.accent { background: #44ffaa; color: #000; font-weight: bold; border: none; border-radius: 60px; padding: 8px 14px; cursor: pointer; }
+    .api-controls button { background: #2a2f44; border: none; border-radius: 60px; padding: 8px 14px; color: white; cursor: pointer; }
+    .api-controls button.accent { background: #44ffaa; color: #000; }
+    .error-msg { color: #ff8888; background: rgba(255,68,68,0.15); padding: 8px; border-radius: 12px; margin: 8px 0; font-size: 11px; border-left: 3px solid #ff4444; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 10px; margin: 0 2px; }
+    .green-dot { background: #22c55e; }
+    .red-dot { background: #ef4444; }
+    .purple-dot { background: #c084fc; }
+    .history-big { color: #ffcc44; font-weight: 700; }
+    .history-small { color: #44ffff; font-weight: 700; }
+    .num-green { color: #22c55e; font-weight: 700; }
+    .num-red { color: #ef4444; font-weight: 700; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -75,42 +63,66 @@
   </div>
   
   <div id="content">
-    <!-- Login Panel Hidden after Unlock -->
     <div class="widget-body" id="loginPanel">
       <div class="login-area">
-        <input type="text" id="vipKey" placeholder="VIP KEY">
-        <button id="unlockBtn" onclick="document.getElementById('loginPanel').style.display='none'; document.getElementById('mainPanel').style.display='block';">🔓 UNLOCK</button>
+        <input type="text" id="vipKey" placeholder="VIP KEY" autocomplete="off">
+        <button id="unlockBtn">🔓 UNLOCK</button>
+        <div style="font-size:10px; color:#9ba1bf; text-align:center;">Key: HB12 or VIP999</div>
       </div>
     </div>
 
     <div class="widget-body" id="mainPanel" style="display:none;">
-      
-      <!-- NEW: Synchronized Timer UI -->
-      <div id="syncTimerContainer">
-        <div style="font-size:10px; color:#9ba1bf; margin-bottom:4px;">NEXT DRAW IN (30S)</div>
-        <div id="countdownDisplay">00:30</div>
-        <div style="margin-top:6px;">
-          <button class="sync-btn" onclick="window.timerOffset--">-1s Lag</button>
-          <button class="sync-btn" onclick="window.timerOffset++">+1s Lead</button>
+      <div class="tabs">
+        <button class="tab active" data-tab="scan">📸 SCAN</button>
+        <button class="tab" data-tab="predict">🔮 PREDICT</button>
+        <button class="tab" data-tab="live">🔴 LIVE DATA</button>
+      </div>
+
+      <div class="panel active" id="scanTab">
+        <div class="paste-zone" id="pasteZone">
+          <div style="font-size:24px;">📋</div>
+          <div style="color:#44ffaa; font-weight:bold; font-size:12px;">PASTE SCREENSHOT</div>
+          <div style="font-size:9px; color:#9ba1bf;">Ctrl+V to add manual rounds</div>
+        </div>
+        <div class="extract-preview" id="extractionPreview"></div>
+      </div>
+
+      <div class="panel" id="predictTab">
+        <div class="algo-card">
+          <div class="algo-name" id="algoName">---</div>
+          <div class="algo-desc" id="algoDesc">Please scan or fetch data first.</div>
+          <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill"></div></div>
+        </div>
+        <div class="prediction-area">
+          <div class="prediction-result" id="predictionResult">---</div>
+          <div class="prediction-number" id="predictedNumber">--</div>
+        </div>
+        <div class="stats-bar">
+          <span>BIG: <b id="bigStat">0</b></span>
+          <span>SMALL: <b id="smallStat">0</b></span>
+          <span>CONF: <b id="confStat">0%</b></span>
         </div>
       </div>
 
-      <div class="tabs">
-        <button class="tab" onclick="showTab('scan')">📸 SCAN</button>
-        <button class="tab active" onclick="showTab('live')">🔴 LIVE DATA</button>
-      </div>
-
-      <div class="panel active" id="liveTab">
+      <div class="panel" id="liveTab">
         <div class="api-controls">
-          <input type="text" id="proxyUrl" placeholder="Vercel Proxy URL">
+          <input type="text" id="proxyUrl" placeholder="https://your-vercel.app/api/wingo">
           <button id="fetchLiveBtn" class="accent">Fetch Now</button>
+          <button id="toggleAutoLiveBtn">▶️ Auto (Sync)</button>
+          <button id="clearLiveHistoryBtn" style="background:#ff4444; color:white;">Clear</button>
+        </div>
+        <div id="liveErrorMsg" class="error-msg" style="display:none;"></div>
+        <div class="info-note">
+          🔄 Status: <span id="liveTimestamp">--</span> | Total: <span id="liveTotalCount">0</span>
         </div>
         <div class="live-table-wrap">
           <table class="live-table">
             <thead>
               <tr><th>Period</th><th>Num</th><th>Result</th><th>Color</th></tr>
             </thead>
-            <tbody id="liveTableBody"></tbody>
+            <tbody id="liveTableBody">
+              <tr><td colspan="4" style="text-align:center; padding:20px;">No data. Click Fetch Now.</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -119,57 +131,138 @@
 </div>
 
 <script>
-  // --- SYNCED TIMER LOGIC ---
-  window.timerOffset = 0;
-  window.lastTriggeredCycle = -1;
-
-  function updateWidget() {
-    const now = new Date();
-    const adjustedTime = new Date(now.getTime() + (window.timerOffset * 1000));
-    const seconds = adjustedTime.getSeconds();
-    const ms = adjustedTime.getMilliseconds();
-    
-    const remaining = 30 - (seconds % 30);
-    const display = document.getElementById('countdownDisplay');
-    
-    if (display) {
-      if (remaining === 1) display.innerText = "00:00";
-      else if (remaining === 30 && seconds % 30 === 0) display.innerText = "00:30";
-      else display.innerText = "00:" + (remaining - 1).toString().padStart(2, '0');
-    }
-
-    // Auto-Fetch: Trigger 0.8s before the cycle ends
-    const currentCycle = Math.floor((adjustedTime.getTime() / 1000) / 30);
-    if (window.lastTriggeredCycle !== currentCycle) {
-      if (remaining === 1 && ms > 200) {
-        window.lastTriggeredCycle = currentCycle;
-        const fetchBtn = document.getElementById('fetchLiveBtn');
-        if (fetchBtn) fetchBtn.click();
-      }
-    }
-    requestAnimationFrame(updateWidget);
-  }
-  updateWidget();
-
-  // --- TAB NAVIGATION ---
-  function showTab(tabId) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(tabId + 'Tab').classList.add('active');
-    event.currentTarget.classList.add('active');
-  }
-
-  // --- DRAG LOGIC ---
+(function(){
+  // --- OCR & DRAG LOGIC (SIMPLIFIED FOR PREVIEW) ---
+  let gameHistory = [];
   const widget = document.getElementById('widget');
   const handle = document.getElementById('dragHandle');
   let drag=false, sx, sy, lx, ly;
-  handle.onmousedown = e => {
+
+  handle.addEventListener('mousedown', e => {
+    if (e.target.closest('button')) return;
     drag=true; sx=e.clientX; sy=e.clientY;
     const rect=widget.getBoundingClientRect(); lx=rect.left; ly=rect.top;
-  };
-  document.onmousemove = e => { if (drag) { widget.style.left=(lx+(e.clientX-sx))+'px'; widget.style.top=(ly+(e.clientY-sy))+'px'; widget.style.right='auto'; }};
-  document.onmouseup = () => drag=false;
-</script>
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => { if (drag) { widget.style.left = (lx+(e.clientX-sx))+'px'; widget.style.top = (ly+(e.clientY-sy))+'px'; widget.style.right='auto'; } });
+  document.addEventListener('mouseup', () => drag=false);
 
+  // --- LIVE DATA LOGIC ---
+  let liveHistory = [];
+  let liveAutoInterval = null;
+
+  function loadLiveHistory() {
+    const saved = localStorage.getItem('wingo_live_history');
+    if (saved) try { liveHistory = JSON.parse(saved); } catch(e) { liveHistory = []; }
+    renderLiveTable();
+  }
+  function saveLiveHistory() {
+    localStorage.setItem('wingo_live_history', JSON.stringify(liveHistory.slice(-500)));
+  }
+
+  async function fetchLiveData() {
+    const proxyUrl = document.getElementById('proxyUrl').value.trim();
+    const errorDiv = document.getElementById('liveErrorMsg');
+    if (!proxyUrl) return;
+    
+    errorDiv.style.display = 'none';
+    try {
+      const res = await fetch(proxyUrl);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+
+      const newHistory = data.history || [];
+      const existing = new Set(liveHistory.map(h => h.period));
+      let added = 0;
+
+      for (const item of newHistory) {
+        if (item.period && !existing.has(item.period)) {
+          liveHistory.push(item);
+          existing.add(item.period);
+          added++;
+        }
+      }
+
+      if (added > 0) {
+        liveHistory.sort((a,b) => b.period.localeCompare(a.period));
+        saveLiveHistory();
+        renderLiveTable();
+      }
+      document.getElementById('liveTotalCount').innerText = liveHistory.length;
+      document.getElementById('liveTimestamp').innerText = new Date().toLocaleTimeString();
+    } catch (err) {
+      errorDiv.style.display='block';
+      errorDiv.innerText = '❌ ' + err.message;
+    }
+  }
+
+  function toggleAutoRefresh() {
+    const btn = document.getElementById('toggleAutoLiveBtn');
+    if (liveAutoInterval) {
+      clearInterval(liveAutoInterval);
+      liveAutoInterval = null;
+      btn.innerHTML = '▶️ Auto (Sync)';
+      btn.style.background = '';
+    } else {
+      fetchLiveData();
+      btn.style.background = '#ff3366';
+      liveAutoInterval = setInterval(() => {
+        const sec = new Date().getSeconds();
+        // TRIGGER FETCH AT :02 and :32 SECONDS
+        if (sec === 2 || sec === 32) fetchLiveData();
+        
+        const next = sec < 30 ? (32 - sec) : (62 - sec);
+        btn.innerHTML = `⏸️ Sync (${next}s)`;
+      }, 1000);
+    }
+  }
+
+  function renderLiveTable() {
+    const tbody = document.getElementById('liveTableBody');
+    if (!liveHistory.length) return;
+    let html = '';
+    liveHistory.slice(0, 50).forEach(row => {
+      const resCls = row.result === 'BIG' ? 'history-big' : 'history-small';
+      const numCls = [1,3,7,9].includes(row.number) ? 'num-green' : 'num-red';
+      html += `<tr>
+        <td style="font-family:monospace;">${row.period}</td>
+        <td class="${numCls}">${row.number}</td>
+        <td class="${resCls}">${row.result}</td>
+        <td><span class="dot ${row.number >= 5 ? 'red-dot' : 'green-dot'}"></span></td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+  }
+
+  // UI INIT
+  document.getElementById('unlockBtn').addEventListener('click', () => {
+    const key = document.getElementById('vipKey').value.trim();
+    if (['HB12', 'VIP999'].includes(key)) {
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('mainPanel').style.display = 'block';
+    } else alert('Invalid key');
+  });
+
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById(t.dataset.tab + 'Tab').classList.add('active');
+    });
+  });
+
+  document.getElementById('fetchLiveBtn').addEventListener('click', fetchLiveData);
+  document.getElementById('toggleAutoLiveBtn').addEventListener('click', toggleAutoRefresh);
+  document.getElementById('clearLiveHistoryBtn').addEventListener('click', () => {
+    if(confirm('Clear history?')) { liveHistory=[]; saveLiveHistory(); renderLiveTable(); }
+  });
+  document.getElementById('minimizeBtn').addEventListener('click', () => {
+    const c = document.getElementById('content');
+    c.style.display = c.style.display === 'none' ? 'block' : 'none';
+  });
+
+  loadLiveHistory();
+})();
+</script>
 </body>
 </html>
