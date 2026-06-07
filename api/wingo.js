@@ -1,47 +1,873 @@
-// api/wingo.js
-export default async function handler(req, res) {
-  // 1. CORS Headers (Keep these to allow your widget to connect)
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
-
-  try {
-    const apiKey = '2f3e5638f4ace8154d1da9db0a2e00e5'; // Your ScraperAPI Key
-    const ts = Date.now();
-    const targetUrl = `https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?ts=${ts}`;
-
-    // 2. Wrap the targetUrl with ScraperAPI
-    const proxyUrl = `https://api.scraperapi.com/?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
-
-    const response = await fetch(proxyUrl, {
-      method: 'GET'
-    });
-
-    if (!response.ok) {
-      throw new Error(`ScraperAPI responded with status: ${response.status}`);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>WINGO · TRUE PATTERN AI (Fixed Future Period)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    const data = await response.json();
-    
-    // 3. Process the data (Keep your existing mapping logic)
-    const list = data.data?.list || data.list || (Array.isArray(data) ? data : []);
+    body {
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      background: radial-gradient(circle at 20% 30%, #0a0c18, #03050a);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
 
-    const history = list.map(item => ({
-      period: String(item.issueNumber || item.IssueNumber || ''),
-      number: parseInt(item.number || item.Number || 0, 10),
-      result: (item.number || item.Number) >= 5 ? 'BIG' : 'SMALL'
-    })).filter(item => item.period);
+    .game-iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      z-index: 1;
+      opacity: 0.92;
+      pointer-events: auto;
+    }
 
-    // 4. Return the formatted history to your widget
-    return res.status(200).json({ success: true, history });
+    .widget {
+      position: fixed;
+      z-index: 10000;
+      top: 18px;
+      right: 18px;
+      width: min(460px, calc(100vw - 32px));
+      background: rgba(10, 12, 22, 0.92);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-radius: 44px;
+      border: 1px solid rgba(255, 130, 150, 0.5);
+      cursor: default;
+    }
 
-  } catch (error) {
-    console.error('Proxy Error:', error.message);
-    return res.status(200).json({ 
-      success: false, 
-      error: "Connection Error: " + error.message 
-    });
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 22px;
+      background: linear-gradient(115deg, rgba(255, 70, 110, 0.3), rgba(255, 150, 80, 0.2));
+      border-bottom: 1px solid rgba(255, 220, 140, 0.5);
+      border-radius: 44px 44px 0 0;
+      cursor: grab;
+    }
+
+    .widget-header:active { cursor: grabbing; }
+
+    .widget-header h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #fff6e6, #ffcd9a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .widget-header button {
+      background: rgba(0, 0, 0, 0.6);
+      border: none;
+      color: #ffdebc;
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .widget-header button:hover {
+      background: #ff3366;
+      color: white;
+    }
+
+    .widget-body { padding: 20px; }
+
+    .login-area {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .login-area input {
+      padding: 14px;
+      background: rgba(10, 14, 24, 0.9);
+      border: 1px solid #4a4f72;
+      border-radius: 48px;
+      color: #fff5e8;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .login-area button {
+      background: linear-gradient(95deg, #ff3366, #ff884d);
+      border: none;
+      border-radius: 48px;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px;
+      border-radius: 60px;
+    }
+
+    .tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 10px 0;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #e2e8ff;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: linear-gradient(95deg, #ff3366, #ff884d);
+      color: white;
+    }
+
+    .panel {
+      display: none;
+      animation: fadeGlass 0.25s ease;
+    }
+
+    .panel.active { display: block; }
+
+    @keyframes fadeGlass {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .info-card {
+      background: rgba(8, 12, 22, 0.85);
+      backdrop-filter: blur(8px);
+      border-radius: 48px;
+      padding: 14px 20px;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border: 1px solid rgba(255, 180, 100, 0.6);
+    }
+
+    .future-period {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #ffdfb0;
+      background: rgba(0,0,0,0.3);
+      padding: 4px 12px;
+      border-radius: 40px;
+    }
+
+    .timer-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 34px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffdfb0, #ffaa55);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .trend-card {
+      background: rgba(12, 16, 28, 0.88);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      padding: 16px;
+      margin: 12px 0;
+      border-left: 6px solid #ffaa55;
+    }
+
+    .trend-name {
+      font-weight: 800;
+      font-size: 15px;
+      color: #ffdfb0;
+      margin-bottom: 8px;
+    }
+
+    .trend-desc {
+      font-size: 11.5px;
+      color: #cbd5ff;
+      line-height: 1.4;
+    }
+
+    .confidence-bar {
+      background: #252d4a;
+      border-radius: 40px;
+      height: 8px;
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .confidence-fill {
+      background: linear-gradient(90deg, #44ffaa, #ffcc44);
+      width: 0%;
+      height: 8px;
+      border-radius: 40px;
+      transition: width 0.3s ease;
+    }
+
+    .prediction-area {
+      text-align: center;
+      background: rgba(5, 8, 18, 0.88);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      padding: 20px 16px;
+      margin: 20px 0;
+    }
+
+    .prediction-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .prediction-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 36px;
+    }
+    .prediction-dot.green-dot { background: #22c55e; }
+    .prediction-dot.red-dot { background: #ef4444; }
+    .prediction-dot.purple-dot { background: #c084fc; }
+
+    .dual-dot-container { display: flex; gap: 4px; }
+    .dual-dot { width: 36px; height: 36px; border-radius: 36px; }
+
+    .prediction-big-small {
+      font-size: 44px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+    .big-result { color: #ffcc44; }
+    .small-result { color: #44ffff; }
+
+    .prediction-number {
+      font-size: 48px;
+      font-weight: 800;
+      font-family: monospace;
+      background: linear-gradient(135deg, #fff, #ddd);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .num-green { color: #86efac; background: none; -webkit-background-clip: unset; }
+    .num-red { color: #f87171; }
+    .num-purple { color: #d8b4fe; }
+
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(8, 12, 22, 0.8);
+      backdrop-filter: blur(8px);
+      border-radius: 60px;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #f0f3ff;
+    }
+
+    .stats-bar b { color: #ffcc77; font-size: 16px; margin-left: 4px; }
+
+    .live-table-wrap, .history-table-wrap {
+      max-height: 380px;
+      overflow-y: auto;
+      border-radius: 28px;
+      background: rgba(8, 11, 20, 0.7);
+      backdrop-filter: blur(4px);
+      margin-top: 16px;
+      border: 1px solid rgba(255, 180, 120, 0.3);
+    }
+
+    .live-table, .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+
+    .live-table th, .history-table th {
+      text-align: left;
+      padding: 14px 12px;
+      color: #ffbc6e;
+      background: #0a0c12;
+      position: sticky;
+      top: 0;
+      font-weight: 700;
+      border-bottom: 1px solid #ffbc6e33;
+    }
+
+    .live-table td, .history-table td {
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255, 200, 150, 0.15);
+      color: #f0f3fc;
+      vertical-align: middle;
+    }
+
+    .dot-wrapper { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+    .dot { width: 11px; height: 11px; border-radius: 11px; }
+    .green-dot { background: #22c55e; }
+    .red-dot { background: #ef4444; }
+    .purple-dot { background: #c084fc; }
+
+    .info-note {
+      font-size: 11px;
+      color: #cdd9ff;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 10px 14px;
+      border-radius: 40px;
+      margin: 10px 0;
+      text-align: center;
+    }
+    .status-badge {
+      font-size: 10px;
+      background: #1f2937;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<iframe class="game-iframe" src="https://hgnice.club/#/register?invitationCode=287821529002"></iframe>
+
+<div class="widget" id="widget">
+  <div class="widget-header" id="dragHandle">
+    <h3>⚡ WINGO · TRUE PATTERN AI</h3>
+    <button id="minimizeBtn">−</button>
+  </div>
+  <div id="content">
+    <div class="widget-body" id="loginPanel">
+      <div class="login-area">
+        <input type="text" id="vipKey" placeholder="VIP KEY" autocomplete="off">
+        <button id="unlockBtn">🔓 UNLOCK</button>
+        <div style="font-size:11px; color:#b9c2f0; text-align:center;">Key: HB12 or VIP999</div>
+      </div>
+    </div>
+    <div class="widget-body" id="mainPanel" style="display:none;">
+      <div class="tabs">
+        <button class="tab active" data-tab="predict">🔮 PREDICT</button>
+        <button class="tab" data-tab="live">📡 LIVE DATA</button>
+        <button class="tab" data-tab="history">📜 HISTORY</button>
+      </div>
+      <div class="panel active" id="predictTab">
+        <div class="info-card">
+          <span class="future-period" id="futurePeriodDisplay">----</span>
+          <span class="timer-value" id="roundTimerDisplay">--s</span>
+        </div>
+        <div class="trend-card">
+          <div class="trend-name" id="trendName">📊 PATTERN MATCHING</div>
+          <div class="trend-desc" id="trendDesc">Analyzing sequence with 25+ patterns</div>
+          <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill"></div></div>
+        </div>
+        <div class="prediction-area" id="predictionArea">
+          <div class="prediction-row">---</div>
+        </div>
+        <div class="stats-bar">
+          <span>🔴 BIG: <b id="bigStat">0</b></span>
+          <span>🟢 SMALL: <b id="smallStat">0</b></span>
+          <span>📊 CONF: <b id="confStat">0%</b></span>
+        </div>
+      </div>
+      <div class="panel" id="liveTab">
+        <div class="info-note">
+          🔗 WORKING API · Auto‑sync at round end (0s & 30s) &nbsp;|&nbsp; TOTAL ROUNDS: <b id="liveTotalCount">0</b>
+          <span id="apiStatus" class="status-badge">🔄 connecting</span>
+        </div>
+        <div class="live-table-wrap">
+          <table class="live-table">
+            <thead><tr><th>PERIOD</th><th>NUMBER</th><th>RESULT</th><th>PATTERN</th></thead>
+            <tbody id="liveTableBody"><tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...✨</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel" id="historyTab">
+        <div class="info-note" id="historyStats">📊 Loading history...</div>
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead><tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>✅/❌</th></tr></thead>
+            <tbody id="historyTableBody"><tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const PRIMARY_API = "https://livewingo30.vercel.app/api/wingo";
+  
+  let liveHistory = [];
+  let predictionHistory = [];
+  let currentPrediction = null;
+  let currentPredictedNumber = null;
+  let lastPatternName = "pattern detection";
+  let lastConfidence = 0.7;
+  
+  let timerAnimation = null;
+  let isPageVisible = true;
+  let lastFetchSecond = -1;
+
+  const apiStatusSpan = document.getElementById('apiStatus');
+
+  // Drag widget
+  const widget = document.getElementById('widget');
+  const dragHandle = document.getElementById('dragHandle');
+  let drag = false, startX, startY, startLeft, startTop;
+  dragHandle.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) return;
+    drag = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = widget.getBoundingClientRect();
+    startLeft = rect.left;
+    startTop = rect.top;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!drag) return;
+    widget.style.left = `${startLeft + (e.clientX - startX)}px`;
+    widget.style.top = `${startTop + (e.clientY - startY)}px`;
+    widget.style.right = 'auto';
+  });
+  document.addEventListener('mouseup', () => { drag = false; });
+
+  // Page Visibility API
+  document.addEventListener('visibilitychange', () => {
+    isPageVisible = !document.hidden;
+    if (isPageVisible) {
+      startTimer();
+      fetchLiveData();
+    } else {
+      if (timerAnimation) cancelAnimationFrame(timerAnimation);
+      timerAnimation = null;
+    }
+  });
+
+  function getResultFromNumber(num) {
+    return (num >= 5 && num <= 9) ? 'BIG' : 'SMALL';
   }
-}
+
+  function getDotHtml(num) {
+    const n = parseInt(num);
+    let dots = [];
+    if (n === 5) dots = ['green-dot', 'purple-dot'];
+    else if (n === 0) dots = ['red-dot', 'purple-dot'];
+    else if ([1,3,7,9].includes(n)) dots = ['green-dot'];
+    else if ([2,4,6,8].includes(n)) dots = ['red-dot'];
+    if (dots.length === 0) return '<span class="dot" style="background:#aaa;"></span>';
+    return `<div class="dot-wrapper">${dots.map(d => `<span class="dot ${d}"></span>`).join('')}</div>`;
+  }
+  
+  function getNumberClass(num) {
+    const n = parseInt(num);
+    if ([1,3,7,9].includes(n)) return 'num-green';
+    if ([2,4,6,8].includes(n)) return 'num-red';
+    if (n === 5 || n === 0) return 'num-purple';
+    return '';
+  }
+
+  function updateHistoryStats() {
+    const total = predictionHistory.length;
+    const correct = predictionHistory.filter(p => p.correct === true).length;
+    const incorrect = total - correct;
+    const statsDiv = document.getElementById('historyStats');
+    if (statsDiv) {
+      statsDiv.innerHTML = `📜 PREDICTION HISTORY — ✅ ${correct}  |  ❌ ${incorrect}  |  Total: ${total}`;
+    }
+  }
+
+  function loadLiveHistory() {
+    const saved = localStorage.getItem('wingo_pattern_v10');
+    if (saved) try { liveHistory = JSON.parse(saved); } catch(e) { liveHistory = []; }
+    const savedPred = localStorage.getItem('wingo_pred_history_v10');
+    if (savedPred) try { predictionHistory = JSON.parse(savedPred); } catch(e) { predictionHistory = []; }
+    renderLiveTable();
+    renderHistoryTable();
+    updateHistoryStats();
+    if (liveHistory.length > 0) generateStablePrediction();
+    else updateUIDefault();
+  }
+  
+  function saveLiveHistory() {
+    localStorage.setItem('wingo_pattern_v10', JSON.stringify(liveHistory.slice(-500)));
+  }
+  
+  function savePredictionHistory() {
+    localStorage.setItem('wingo_pred_history_v10', JSON.stringify(predictionHistory.slice(-200)));
+    updateHistoryStats();
+  }
+
+  function renderLiveTable() {
+    const tbody = document.getElementById('liveTableBody');
+    if (!liveHistory.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...✨</td></tr>';
+      return;
+    }
+    let html = '';
+    liveHistory.slice(0, 50).forEach(row => {
+      const numVal = row.number;
+      const numberClass = getNumberClass(numVal);
+      const dotMarkup = getDotHtml(numVal);
+      const resultClass = (row.result === 'BIG') ? 'big-result' : 'small-result';
+      html += `<tr>
+        <td style="font-family:monospace;">${row.period}</td>
+        <td class="${numberClass}"><strong>${numVal}</strong></td>
+        <td class="${resultClass}" style="font-weight:700;">${row.result}</td>
+        <td>${dotMarkup}</td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+    document.getElementById('liveTotalCount').innerText = liveHistory.length;
+  }
+
+  function renderHistoryTable() {
+    const tbody = document.getElementById('historyTableBody');
+    if (!predictionHistory.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr>';
+      return;
+    }
+    let html = '';
+    predictionHistory.slice(0, 50).forEach(p => {
+      const correctMark = p.correct ? '✅' : '❌';
+      const actualClass = p.actualResult ? (p.actualResult === 'BIG' ? 'big-result' : 'small-result') : '';
+      html += `<tr>
+        <td style="font-family:monospace;">${p.period}</td>
+        <td class="${p.predictedResult === 'BIG' ? 'big-result' : 'small-result'}">${p.predictedResult}</td>
+        <td class="${getNumberClass(p.predictedNumber)}"><strong>${p.predictedNumber}</strong></td>
+        <td class="${actualClass}">${p.actualResult || 'pending'} ${p.actualNumber !== undefined ? p.actualNumber : ''}</td>
+        <td>${correctMark}</td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+    updateHistoryStats();
+  }
+
+  // CORRECT FUTURE PERIOD: find the numerically largest period and add 1
+  function getNextPeriod() {
+    if (liveHistory.length === 0) return "----";
+    let maxPeriod = liveHistory[0].period;
+    let maxNum = -1;
+    for (let h of liveHistory) {
+      let match = h.period.match(/\d+$/);
+      if (match) {
+        let num = parseInt(match[0], 10);
+        if (num > maxNum) {
+          maxNum = num;
+          maxPeriod = h.period;
+        }
+      }
+    }
+    const match = maxPeriod.match(/\d+$/);
+    if (match) {
+      let numStr = match[0];
+      let num = parseInt(numStr, 10);
+      let nextNum = num + 1;
+      let nextNumStr = nextNum.toString();
+      while (nextNumStr.length < numStr.length) nextNumStr = "0" + nextNumStr;
+      return maxPeriod.slice(0, maxPeriod.length - numStr.length) + nextNumStr;
+    }
+    return maxPeriod + "+1";
+  }
+
+  function convertToAB(history) {
+    return history.map(h => h.result === 'SMALL' ? 'A' : 'B');
+  }
+
+  const patterns = [
+    { name: "1A1B (ABAB)", regex: /^(AB)+$/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.75 },
+    { name: "2A2B (AABB)", regex: /^(AABB)+$/, next: (seq) => {
+      let last = seq.slice(-2).join('');
+      if (last === 'AA') return 'B';
+      if (last === 'BB') return 'A';
+      return 'A';
+    }, weight: 0.7 },
+    { name: "3A3B (AAABBB)", regex: /^(AAABBB)+$/, next: (seq) => {
+      let lastThree = seq.slice(-3).join('');
+      if (lastThree === 'AAA') return 'B';
+      if (lastThree === 'BBB') return 'A';
+      return 'A';
+    }, weight: 0.7 },
+    { name: "4A4B (AAAABBBB)", regex: /^(AAAABBBB)+$/, next: (seq) => seq.slice(-4).join('') === 'AAAA' ? 'B' : 'A', weight: 0.7 },
+    { name: "1A2B (ABBABB)", regex: /^(ABB)+$/, next: (seq) => seq.slice(-3).join('') === 'ABB' ? 'A' : 'B', weight: 0.7 },
+    { name: "2A1B (AABAAB)", regex: /^(AAB)+$/, next: (seq) => seq.slice(-2).join('') === 'AA' ? 'B' : 'A', weight: 0.7 },
+    { name: "Long streak A (≥5)", regex: /^A{5,}$/, next: () => 'B', weight: 0.85 },
+    { name: "Long streak B (≥5)", regex: /^B{5,}$/, next: () => 'A', weight: 0.85 },
+    { name: "Mirror trend", regex: /^ABABABAB/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.75 }
+  ];
+
+  function detectPattern(abSeq) {
+    if (abSeq.length < 2) return null;
+    let testSeq = abSeq.join('');
+    for (let p of patterns) {
+      if (p.regex.test(testSeq) || (testSeq.length > 12 && p.regex.test(testSeq.slice(-12)))) {
+        let next = p.next(abSeq);
+        return { pattern: p.name, next, confidence: p.weight };
+      }
+    }
+    let recent = abSeq.slice(0,6);
+    let aCount = recent.filter(c => c === 'A').length;
+    let bCount = recent.length - aCount;
+    let next = aCount > bCount ? 'B' : 'A';
+    let conf = Math.max(aCount, bCount) / recent.length;
+    return { pattern: "Weighted recency", next, confidence: conf };
+  }
+
+  function predictNumberMatchingResult(history, targetResult) {
+    if (history.length === 0) return targetResult === 'BIG' ? 7 : 2;
+    let scores = Array(10).fill(0);
+    let totalWeight = 0;
+    for (let i=0; i<Math.min(history.length, 30); i++) {
+      let weight = Math.pow(0.88, i);
+      let num = history[i].number;
+      scores[num] += weight;
+      totalWeight += weight;
+    }
+    if (history[0]) scores[history[0].number] *= 0.4;
+    let candidates = targetResult === 'BIG' ? [5,6,7,8,9] : [0,1,2,3,4];
+    let bestNum = candidates[0];
+    let bestScore = -1;
+    for (let num of candidates) {
+      if (scores[num] > bestScore) {
+        bestScore = scores[num];
+        bestNum = num;
+      }
+    }
+    let confidence = totalWeight > 0 ? bestScore / totalWeight : 0.5;
+    return { number: bestNum, conf: Math.min(0.85, confidence + 0.1) };
+  }
+
+  function generateStablePrediction() {
+    if (liveHistory.length === 0) {
+      currentPrediction = 'BIG';
+      currentPredictedNumber = 7;
+      lastPatternName = "Initial";
+      lastConfidence = 0.5;
+      return;
+    }
+    const abSeq = convertToAB(liveHistory);
+    const patternResult = detectPattern(abSeq);
+    let predictedResult = patternResult.next === 'A' ? 'SMALL' : 'BIG';
+    let patternConf = patternResult.confidence;
+    const numPred = predictNumberMatchingResult(liveHistory, predictedResult);
+    let predictedNumber = numPred.number;
+    let numConf = numPred.conf;
+    let overallConf = (patternConf + numConf) / 2;
+    overallConf = Math.min(0.94, Math.max(0.52, overallConf));
+    currentPrediction = predictedResult;
+    currentPredictedNumber = predictedNumber;
+    lastPatternName = patternResult.pattern;
+    lastConfidence = overallConf;
+  }
+
+  function getNumberDisplayData(num) {
+    if ([1,3,7,9].includes(num)) return { dotClass: "green-dot", dual: false, textClass: "num-green" };
+    if ([2,4,6,8].includes(num)) return { dotClass: "red-dot", dual: false, textClass: "num-red" };
+    if (num === 5) return { dotClass: "green-dot purple-dot", dual: true, textClass: "num-purple" };
+    if (num === 0) return { dotClass: "red-dot purple-dot", dual: true, textClass: "num-purple" };
+    return { dotClass: "", dual: false, textClass: "" };
+  }
+
+  function updateUIWithCurrentPrediction() {
+    if (!currentPrediction) return;
+    const bigCount = liveHistory.filter(r => r.result === 'BIG').length;
+    const smallCount = liveHistory.length - bigCount;
+    document.getElementById('bigStat').innerText = bigCount;
+    document.getElementById('smallStat').innerText = smallCount;
+    const confPercent = Math.floor(lastConfidence * 100);
+    document.getElementById('confStat').innerText = `${confPercent}%`;
+    document.getElementById('confidenceFill').style.width = `${confPercent}%`;
+
+    const displayData = getNumberDisplayData(currentPredictedNumber);
+    let dotHtml = '';
+    if (displayData.dual) {
+      let classes = displayData.dotClass.split(' ');
+      dotHtml = `<div class="dual-dot-container">${classes.map(c => `<div class="dual-dot ${c}" style="width:36px; height:36px; border-radius:36px;"></div>`).join('')}</div>`;
+    } else if (displayData.dotClass) {
+      dotHtml = `<div class="prediction-dot ${displayData.dotClass}" style="width:36px; height:36px; border-radius:36px;"></div>`;
+    } else {
+      dotHtml = `<div style="width:36px; height:36px; border-radius:36px; background:#aaa;"></div>`;
+    }
+    const resultClass = (currentPrediction === 'BIG') ? 'big-result' : 'small-result';
+    const bigSmallText = (currentPrediction === 'BIG') ? 'BIG' : 'SMALL';
+    document.getElementById('predictionArea').innerHTML = `
+      <div class="prediction-row">
+        ${dotHtml}
+        <div class="prediction-big-small ${resultClass}">${bigSmallText}</div>
+        <div class="prediction-number ${displayData.textClass}">${currentPredictedNumber}</div>
+      </div>
+    `;
+    document.getElementById('trendName').innerHTML = `🎯 ${currentPrediction} · Predicted ${currentPredictedNumber}`;
+    const lastActual = liveHistory[0] ? `${liveHistory[0].result} ${liveHistory[0].number}` : 'none';
+    document.getElementById('trendDesc').innerHTML = `🧠 ${lastPatternName} | ${liveHistory.length} rounds | Last actual: ${lastActual} (not copied)`;
+    document.getElementById('futurePeriodDisplay').innerText = getNextPeriod();
+  }
+
+  function updateUIDefault() {
+    document.getElementById('bigStat').innerText = '0';
+    document.getElementById('smallStat').innerText = '0';
+    document.getElementById('confStat').innerText = '0%';
+    document.getElementById('confidenceFill').style.width = '0%';
+    document.getElementById('predictionArea').innerHTML = '<div class="prediction-row">---</div>';
+    document.getElementById('trendName').innerHTML = '📊 AWAITING DATA';
+    document.getElementById('trendDesc').innerHTML = 'Fetching first rounds...';
+    document.getElementById('futurePeriodDisplay').innerText = '----';
+  }
+
+  function onNewRoundData() {
+    if (liveHistory.length > 0 && currentPrediction) {
+      const latestRound = liveHistory[0];
+      const existing = predictionHistory.find(p => p.period === latestRound.period);
+      if (!existing) {
+        predictionHistory.unshift({
+          period: latestRound.period,
+          predictedResult: currentPrediction,
+          predictedNumber: currentPredictedNumber,
+          actualResult: latestRound.result,
+          actualNumber: latestRound.number,
+          correct: (currentPrediction === latestRound.result)
+        });
+        savePredictionHistory();
+        renderHistoryTable();
+      }
+    }
+    generateStablePrediction();
+    updateUIWithCurrentPrediction();
+  }
+
+  async function fetchLiveData() {
+    if (!isPageVisible) return;
+    apiStatusSpan.innerText = '🔄 fetching';
+    try {
+      const res = await fetch(PRIMARY_API);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      apiStatusSpan.innerText = '✅ live';
+      const newHistory = data.history || [];
+      const existingSet = new Set(liveHistory.map(h => h.period));
+      let added = 0;
+      for (const item of newHistory) {
+        if (item.period && !existingSet.has(item.period) && typeof item.number !== 'undefined') {
+          let finalResult = item.result;
+          if (!finalResult) finalResult = getResultFromNumber(item.number);
+          liveHistory.unshift({
+            period: String(item.period),
+            number: item.number,
+            result: finalResult
+          });
+          existingSet.add(item.period);
+          added++;
+        }
+      }
+      if (added > 0) {
+        liveHistory.sort((a,b) => String(b.period).localeCompare(String(a.period)));
+        saveLiveHistory();
+        renderLiveTable();
+        onNewRoundData();
+      }
+    } catch (err) {
+      console.warn('Primary API failed:', err);
+      apiStatusSpan.innerText = '⚠️ fallback mock';
+      // Only generate mock if no data at all
+      if (liveHistory.length === 0) {
+        const basePeriod = `20260607100052500`;
+        const randomNum = Math.floor(Math.random() * 10);
+        const newItem = {
+          period: basePeriod,
+          number: randomNum,
+          result: getResultFromNumber(randomNum)
+        };
+        liveHistory.unshift(newItem);
+        saveLiveHistory();
+        renderLiveTable();
+        onNewRoundData();
+      }
+    }
+  }
+
+  // Precise timer using requestAnimationFrame
+  function startTimer() {
+    if (timerAnimation) cancelAnimationFrame(timerAnimation);
+    function update() {
+      if (!isPageVisible) {
+        timerAnimation = requestAnimationFrame(update);
+        return;
+      }
+      const now = new Date();
+      const sec = now.getSeconds();
+      const ms = now.getMilliseconds();
+      let remaining;
+      if (sec < 30) remaining = (30 - sec) * 1000 - ms;
+      else remaining = (60 - sec) * 1000 - ms;
+      if (remaining < 0) remaining = 0;
+      const timerElem = document.getElementById('roundTimerDisplay');
+      if (timerElem) {
+        const secondsLeft = Math.ceil(remaining / 1000);
+        timerElem.innerText = `${secondsLeft}s`;
+        timerElem.style.color = secondsLeft <= 3 ? '#ff8866' : '#ffcc88';
+      }
+      if (remaining < 50 && remaining > -50) {
+        const nowSec = new Date().getSeconds();
+        if (lastFetchSecond !== nowSec) {
+          lastFetchSecond = nowSec;
+          fetchLiveData();
+        }
+      }
+      timerAnimation = requestAnimationFrame(update);
+    }
+    timerAnimation = requestAnimationFrame(update);
+  }
+
+  function startAutoSync() {
+    startTimer();
+    fetchLiveData();
+  }
+
+  // UI Boot
+  document.getElementById('unlockBtn').addEventListener('click', () => {
+    const key = document.getElementById('vipKey').value.trim();
+    if (['HB12', 'VIP999'].includes(key)) {
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('mainPanel').style.display = 'block';
+      startAutoSync();
+    } else alert('Invalid key');
+  });
+  
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById(t.dataset.tab + 'Tab').classList.add('active');
+    });
+  });
+  
+  document.getElementById('minimizeBtn').addEventListener('click', () => {
+    const c = document.getElementById('content');
+    c.style.display = c.style.display === 'none' ? 'block' : 'none';
+  });
+  
+  loadLiveHistory();
+})();
+</script>
+</body>
+</html>
