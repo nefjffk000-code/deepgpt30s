@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>WINGO · OCR + LIVE PERMANENT HISTORY</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; height: 100vh; width: 100vw; background: #0a0d16; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    .game-iframe { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; opacity: 0.92; }
+
+    .widget {
+      position: fixed; z-index: 10000; top: 12px; right: 12px;
+      width: min(600px, calc(100vw - 24px));
+      background: rgba(14, 18, 28, 0.96); backdrop-filter: blur(20px);
+      border-radius: 28px; border: 1px solid rgba(255,51,102,0.5);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      cursor: move;
+    }
+    .widget-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 18px; background: linear-gradient(135deg, rgba(255,51,102,0.25), rgba(255,136,77,0.15));
+      border-bottom: 1px solid rgba(255,204,51,0.3); border-radius: 28px 28px 0 0;
+      cursor: grab;
+    }
+    .widget-header:active { cursor: grabbing; }
+    .widget-header h3 { font-size: 0.85rem; font-weight: 700; background: linear-gradient(135deg,#fff,#ffcc88); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .widget-header button { background: rgba(255,255,255,0.1); border: none; color: #ffdd99; font-size: 18px; width: 26px; height: 26px; border-radius: 30px; cursor: pointer; }
+    .widget-body { padding: 14px; }
+
+    .login-area { display: flex; flex-direction: column; gap: 10px; }
+    .login-area input { padding: 10px; background: #10131f; border: 1px solid #2c2f44; border-radius: 60px; color: #ffdd99; text-align: center; font-size: 13px; }
+    .login-area button { background: linear-gradient(95deg,#ff3366,#ff884d); border: none; border-radius: 60px; padding: 10px; font-weight: 600; color: white; cursor: pointer; }
+    .key-hint { text-align: center; font-size: 10px; color: #a8aecb; margin-top: 5px; }
+
+    .tabs { display: flex; gap: 6px; margin-bottom: 14px; background: #0c0f18; padding: 4px; border-radius: 60px; }
+    .tab { flex: 1; background: none; border: none; padding: 7px 0; border-radius: 60px; font-size: 11px; font-weight: 600; color: #c2c8e2; cursor: pointer; }
+    .tab.active { background: linear-gradient(95deg,#ff3366,#ff884d); color: white; }
+
+    .panel { display: none; animation: fadeIn 0.2s; }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* OCR SCAN tab */
+    .paste-zone {
+      background: rgba(68,255,170,0.06); border: 1.5px dashed #44ffaa; border-radius: 24px;
+      padding: 18px 12px; text-align: center; cursor: pointer; margin-bottom: 14px;
+    }
+    .paste-zone:hover { background: rgba(68,255,170,0.12); }
+    .paste-icon { font-size: 32px; margin-bottom: 6px; }
+    .paste-text { font-size: 12px; font-weight: 600; color: #44ffaa; }
+    .paste-hint { font-size: 9px; color: #9ba1bf; margin-top: 4px; }
+
+    .extract-preview {
+      background: #0c0f18; border-radius: 20px; padding: 8px;
+      margin-top: 12px; max-height: 340px; overflow-y: auto;
+    }
+    .result-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .result-table th { text-align: left; padding: 8px 4px; color: #ffaa66; border-bottom: 1px solid #2a2f44; font-weight: 600; }
+    .result-table td { padding: 6px 4px; border-bottom: 1px solid #1e2233; color: #e0e4f0; }
+    .period-cell { font-family: monospace; color: #ffffff; font-size: 10px; }
+    .num-cell { font-weight: 700; text-align: center; }
+    .big-cell { color: #ffcc44; }
+    .small-cell { color: #44ffff; }
+    .color-dot-cell { font-size: 12px; }
+
+    /* OCR PREDICT tab */
+    .algo-card { background: #0c0f18; border-radius: 20px; padding: 12px; margin: 12px 0; border-left: 4px solid #ffaa44; }
+    .algo-name { font-size: 13px; font-weight: 800; color: #ffcc66; }
+    .algo-desc { font-size: 10px; color: #c2c8e2; margin: 5px 0; }
+    .confidence-bar { height: 5px; background: #202433; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+    .confidence-fill { height: 100%; background: linear-gradient(90deg, #44ffaa, #ffaa44); width: 0%; }
+
+    .prediction-area { text-align: center; background: #0c0f18; border-radius: 28px; padding: 16px; margin: 12px 0; }
+    .prediction-result { font-size: 42px; font-weight: 800; letter-spacing: 1px; }
+    .big-result { color: #ffcc44; text-shadow: 0 0 5px #ffaa33; }
+    .small-result { color: #44ffff; text-shadow: 0 0 5px #00aaff; }
+    .prediction-number { font-size: 28px; font-weight: 800; background: linear-gradient(135deg,#fff,#ffaa88); -webkit-background-clip: text; background-clip: text; color: transparent; margin-top: 5px; }
+
+    .stats-bar { display: flex; justify-content: space-between; background: #0c0f18; border-radius: 50px; padding: 8px 14px; margin: 10px 0; font-size: 10px; font-weight: 600; color: #ffaa66; }
+
+    /* Shared dot styles */
+    .dot { display: inline-block; width: 12px; height: 12px; border-radius: 12px; margin: 0 2px; vertical-align: middle; }
+    .green-dot { background-color: #22c55e; }
+    .red-dot { background-color: #ef4444; }
+    .purple-dot { background-color: #c084fc; }
+
+    /* LIVE DATA tab styles */
+    .live-table-wrap {
+      max-height: 360px;
+      overflow-y: auto;
+      border-radius: 20px;
+      background: #0c0f18;
+      margin-top: 8px;
+    }
+    .live-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+    .live-table thead tr {
+      position: sticky;
+      top: 0;
+      background: #0c0f18;
+      z-index: 2;
+    }
+    .live-table th {
+      text-align: left;
+      padding: 10px 6px;
+      color: #ffaa66;
+      font-weight: 600;
+      border-bottom: 1px solid #2a2f44;
+      background: #0c0f18;
+    }
+    .live-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #1e2233;
+      color: #e0e4f0;
+      vertical-align: middle;
+    }
+    .history-num { font-weight: 700; text-align: center; }
+    .num-green { color: #22c55e; }
+    .num-red { color: #ef4444; }
+    .num-five {
+      background: linear-gradient(180deg,#22c55e 0%,#22c55e 50%,#c084fc 50%,#c084fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+    .num-zero {
+      background: linear-gradient(180deg,#ef4444 0%,#ef4444 50%,#c084fc 50%,#c084fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+    .history-big { color: #ffcc44; font-weight: 700; }
+    .history-small { color: #44ffff; font-weight: 700; }
+
+    .api-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .api-controls input {
+      flex: 2;
+      background: #10131f;
+      border: 1px solid #2c2f44;
+      border-radius: 60px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 11px;
+    }
+    .api-controls input::placeholder {
+      color: #aaa;
+    }
+    .api-controls button {
+      background: #2a2f44;
+      border: none;
+      border-radius: 60px;
+      padding: 8px 14px;
+      color: white;
+      cursor: pointer;
+    }
+    .api-controls button.accent {
+      background: #44ffaa;
+      color: #000;
+    }
+    .api-controls button.danger {
+      background: #ff4444;
+      color: white;
+    }
+    .balance-badge {
+      color: #44ffaa;
+      font-weight: bold;
+    }
+    .error-msg {
+      color: #ff8888;
+      background: rgba(255,68,68,0.15);
+      padding: 8px;
+      border-radius: 12px;
+      margin: 8px 0;
+      font-size: 11px;
+      border-left: 3px solid #ff4444;
+    }
+    .pagination { display: flex; justify-content: center; gap: 5px; margin-top: 12px; }
+    .page-btn, .page-num { background: #0c0f18; border: none; padding: 3px 8px; border-radius: 30px; color: #ffaa66; font-size: 9px; cursor: pointer; }
+    .page-num.active { background: #ff3366; color: white; }
+
+    .footer-status { text-align: center; margin-top: 14px; font-size: 10px; color: #3eff9e; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .green-signal { display: inline-block; width: 10px; height: 10px; background-color: #44ffaa; border-radius: 10px; box-shadow: 0 0 6px #44ffaa; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+
+    .info-note {
+      background: #1a1f2c;
+      border-radius: 12px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 10px;
+      color: #ccccff;
+      border-left: 3px solid #44ffaa;
+    }
+    .info-note code {
+      background: #00000055;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-family: monospace;
+      color: #ffcc44;
+    }
+
+    @media (max-width: 550px) {
+      .live-table th, .live-table td { font-size: 8px; padding: 6px 3px; }
+      .dot { width: 10px; height: 10px; }
+      .api-controls { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+<iframe class="game-iframe" src="https://hgnice.club/#/register?invitationCode=287821529002" allowfullscreen></iframe>
+
+<div class="widget" id="widget">
+  <div class="widget-header" id="dragHandle">
+    <h3>⚡ OCR + LIVE PERMANENT HISTORY</h3>
+    <button id="minimizeBtn">−</button>
+  </div>
+  <div id="content">
+    <div class="widget-body" id="loginPanel">
+      <div class="login-area">
+        <input type="text" id="vipKey" placeholder="VIP KEY" autocomplete="off">
+        <button id="unlockBtn">🔓 UNLOCK</button>
+        <div class="key-hint">KEY: <strong>HB12</strong></div>
+      </div>
+    </div>
+
+    <div class="widget-body" id="mainPanel" style="display:none;">
+      <div class="tabs">
+        <button class="tab active" data-tab="scan">📸 SCAN (OCR)</button>
+        <button class="tab" data-tab="predict">🎯 PREDICT (OCR)</button>
+        <button class="tab" data-tab="live">🟢 LIVE DATA</button>
+      </div>
+
+      <!-- OCR SCAN TAB (unchanged) -->
+      <div class="panel active" id="scanTab">
+        <div class="paste-zone" id="pasteZone">
+          <div class="paste-icon">📋</div>
+          <div class="paste-text">PASTE SCREENSHOT (Ctrl+V)</div>
+          <div class="paste-hint">full history table – newest shown first</div>
+        </div>
+        <div id="extractionPreview" class="extract-preview">
+          <div style="color:#9ba1bf; text-align:center; padding:15px;">📸 No data. Paste screenshot.</div>
+        </div>
+      </div>
+
+      <!-- OCR PREDICT TAB (unchanged) -->
+      <div class="panel" id="predictTab">
+        <div class="algo-card">
+          <div class="algo-name" id="algoName">🔍 Waiting</div>
+          <div class="algo-desc" id="algoDesc">Paste screenshot to analyse full history</div>
+          <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill"></div></div>
+        </div>
+        <div class="prediction-area">
+          <div id="predictionResult" class="prediction-result">---</div>
+          <div id="predictedNumber" class="prediction-number">--</div>
+        </div>
+        <div class="stats-bar">
+          <span>🔴 BIG: <span id="bigStat">0</span></span>
+          <span>🔵 SMALL: <span id="smallStat">0</span></span>
+          <span>📊 CONF: <span id="confStat">0%</span></span>
+        </div>
+      </div>
+
+      <!-- LIVE DATA TAB -->
+      <div class="panel" id="liveTab">
+        <div class="info-note">
+          ⚠️ <strong>Direct API calls from browser will fail (403/CORS).</strong> You need a backend proxy.<br>
+          👉 Run the <code>proxy.js</code> (Node.js) and enter its URL below (e.g. <code>http://localhost:3001/api/wingo</code>).
+        </div>
+        <div class="api-controls">
+          <input type="text" id="proxyUrl" placeholder="Proxy URL (e.g., http://localhost:3001/api/wingo)" value="http://localhost:3001/api/wingo">
+          <button id="fetchLiveBtn" class="accent">🔄 Fetch Now</button>
+          <button id="toggleAutoLiveBtn">▶️ Auto (5s)</button>
+          <button id="exportLiveCsvBtn">📥 CSV</button>
+          <button id="clearLiveHistoryBtn" class="danger">🗑️ Clear History</button>
+        </div>
+        <div style="margin: 8px 0; font-size: 11px;">
+          💰 Balance: <span id="liveBalance" class="balance-badge">--</span>
+          &nbsp;|&nbsp; ⏱️ Last update: <span id="liveTimestamp">--</span>
+          &nbsp;|&nbsp; 📊 Total records: <span id="liveTotalCount">0</span>
+        </div>
+        <div id="liveErrorMsg" class="error-msg" style="display:none;"></div>
+        <div class="live-table-wrap">
+          <table class="live-table" id="liveTable">
+            <thead>
+              <tr><th>Period</th><th>Number</th><th>Result</th><th>Color</th></tr>
+            </thead>
+            <tbody id="liveTableBody">
+              <tr><td colspan="4">Configure proxy and click "Fetch Now"</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="livePagination"></div>
+      </div>
+
+      <div class="footer-status">
+        <span class="green-signal"></span>
+        <span>TOOL ACTIVE</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== OCR LOGIC (exactly as your working version) ====================
+(function(){
+  let gameHistory = [];
+  let currentPage = 1;
+  const perPage = 15;
+
+  async function preprocessImage(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width  = img.width * 4;
+        canvas.height = img.height * 4;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          const lum = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+          const v = lum < 160 ? 0 : 255;
+          data[i] = data[i+1] = data[i+2] = v;
+        }
+        ctx.putImageData(imageData, 0, 0);
+        canvas.toBlob(blob => resolve(blob), 'image/png');
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function runOCR(file) {
+    const blob = await preprocessImage(file);
+    const worker = await Tesseract.createWorker('eng');
+    await worker.setParameters({ tessedit_pageseg_mode: '6' });
+    const { data: { text } } = await worker.recognize(blob);
+    await worker.terminate();
+    return text.replace(/(\d)[Oo](\d)/g, '$10$2').replace(/(\d)[Il|](\d)/g, '$11$2');
+  }
+
+  function parseGameHistory(rawText) {
+    const entries = [];
+    const seen = new Set();
+    const lines = rawText.split(/\r?\n/);
+    for (const line of lines) {
+      const periodMatch = line.match(/\b(\d{14,18})\b/);
+      if (!periodMatch) continue;
+      const period = periodMatch[1];
+      if (seen.has(period)) continue;
+      const lineWithoutPeriod = line.replace(period, '');
+      const digitMatch = lineWithoutPeriod.match(/(?<!\d)([0-9])(?!\d)/);
+      if (!digitMatch) continue;
+      const bigSmallMatch = line.match(/\b(big|small)\b/i);
+      if (!bigSmallMatch) continue;
+      seen.add(period);
+      entries.push({ period, number: parseInt(digitMatch[1], 10), result: bigSmallMatch[1].toUpperCase() });
+    }
+    if (entries.length === 0) {
+      const re = /(\d{14,18})\D+(\d)\D+(big|small)/gi;
+      let m;
+      while ((m = re.exec(rawText)) !== null) {
+        if (!seen.has(m[1])) {
+          seen.add(m[1]);
+          entries.push({ period: m[1], number: parseInt(m[2],10), result: m[3].toUpperCase() });
+        }
+      }
+    }
+    if (entries.length === 0) {
+      const re = /(\d{14,18})\D+(\d)\D+/g;
+      let m;
+      while ((m = re.exec(rawText)) !== null) {
+        if (!seen.has(m[1])) {
+          const num = parseInt(m[2],10);
+          seen.add(m[1]);
+          entries.push({ period: m[1], number: num, result: num >= 5 ? 'BIG' : 'SMALL' });
+        }
+      }
+    }
+    return entries;
+  }
+
+  function mergeNewEntries(newEntries) {
+    const existing = new Set(gameHistory.map(e => e.period));
+    let added = 0;
+    for (const e of newEntries) {
+      if (e.period && !existing.has(e.period)) {
+        gameHistory.push(e);
+        existing.add(e.period);
+        added++;
+      }
+    }
+    gameHistory.sort((a,b) => a.period.localeCompare(b.period));
+    return added;
+  }
+
+  async function processImage(file) {
+    const previewDiv = document.getElementById('extractionPreview');
+    previewDiv.innerHTML = '<div style="color:#ffcc44; text-align:center; padding:12px;">⏳ OCR scanning… 15–20 sec</div>';
+    try {
+      const ocrText = await runOCR(file);
+      const newRows = parseGameHistory(ocrText);
+      if (!newRows.length) throw new Error('No rows parsed');
+      const added = mergeNewEntries(newRows);
+      updateScanTable();
+      refreshPredictionAndHistory();
+      previewDiv.innerHTML = `<div style="color:#44ffaa; text-align:center; padding:8px;">✅ Added ${added} new rounds · Total: ${gameHistory.length}</div>`;
+      setTimeout(() => updateScanTable(), 1500);
+    } catch(e) {
+      previewDiv.innerHTML = '<div style="color:#ff8888; text-align:center; padding:12px;">❌ No data extracted — try a clearer or larger screenshot</div>';
+      console.error('OCR error:', e);
+    }
+  }
+
+  function getNumberDots(num) {
+    if ([1,3,7,9].includes(num)) return '<span class="dot green-dot"></span>';
+    if ([2,4,6,8].includes(num)) return '<span class="dot red-dot"></span>';
+    if (num === 5) return '<span class="dot green-dot"></span><span class="dot purple-dot"></span>';
+    if (num === 0) return '<span class="dot red-dot"></span><span class="dot purple-dot"></span>';
+    return '—';
+  }
+
+  function getNumberClass(num) {
+    if ([1,3,7,9].includes(num)) return 'num-green';
+    if ([2,4,6,8].includes(num)) return 'num-red';
+    if (num === 5) return 'num-five';
+    if (num === 0) return 'num-zero';
+    return '';
+  }
+
+  function updateScanTable() {
+    const container = document.getElementById('extractionPreview');
+    if (!gameHistory.length) {
+      container.innerHTML = '<div style="color:#9ba1bf; text-align:center; padding:15px;">📸 No data. Paste screenshot.</div>';
+      return;
+    }
+    const descending = [...gameHistory].sort((a,b) => b.period.localeCompare(a.period));
+    let html = '<table class="result-table"><thead><tr><th>Period</th><th>Num</th><th>Result</th><th>Color</th></tr></thead><tbody>';
+    for (const e of descending.slice(0, 50)) {
+      const cls = e.result === 'BIG' ? 'big-cell' : 'small-cell';
+      html += `<tr><td class="period-cell">${e.period}</td><td class="num-cell ${cls}">${e.number}</td><td class="${cls}">${e.result}</td><td class="color-dot-cell">${getNumberDots(e.number)}</td></tr>`;
+    }
+    container.innerHTML = html + '</tbody></table>';
+  }
+
+  function refreshPredictionAndHistory() {
+    if (!gameHistory.length) {
+      document.getElementById('algoName').innerText = '🔍 No data';
+      document.getElementById('algoDesc').innerText = 'Paste screenshot';
+      document.getElementById('confidenceFill').style.width = '0%';
+      document.getElementById('predictionResult').innerHTML = '---';
+      document.getElementById('predictedNumber').innerHTML = '--';
+      document.getElementById('bigStat').innerText = '0';
+      document.getElementById('smallStat').innerText = '0';
+      document.getElementById('confStat').innerText = '0%';
+      return;
+    }
+    const pred = predictNext(gameHistory);
+    document.getElementById('algoName').innerText = pred.name;
+    document.getElementById('algoDesc').innerText = pred.desc;
+    document.getElementById('confidenceFill').style.width = pred.confidence+'%';
+    document.getElementById('predictionResult').innerHTML = `<span class="${pred.nextResult==='BIG'?'big-result':'small-result'}">${pred.nextResult}</span>`;
+    document.getElementById('predictedNumber').innerHTML = pred.nextNumber;
+    document.getElementById('confStat').innerText = pred.confidence+'%';
+    const big = gameHistory.filter(e => e.result==='BIG').length;
+    document.getElementById('bigStat').innerText = `${big} (${Math.round(big/gameHistory.length*100)}%)`;
+    document.getElementById('smallStat').innerText = gameHistory.length - big;
+  }
+
+  function predictNext(history) {
+    if (history.length < 3) return { nextResult:'BIG', nextNumber:7, confidence:50, name:'🔍 Insufficient data', desc:'need 3+ rounds' };
+    const results = history.map(h => h.result);
+    const numbers = history.map(h => h.number);
+    const lastRes = results[results.length-1];
+    const freq = Array(10).fill(0);
+    numbers.forEach(n => freq[n]++);
+    let mostFreq = 0;
+    for (let i=0;i<=9;i++) if (freq[i] > freq[mostFreq]) mostFreq = i;
+
+    let isAlt = true;
+    for (let i=1;i<results.length;i++) if (results[i]===results[i-1]) { isAlt=false; break; }
+    if (isAlt && results.length>=4) {
+      const next = lastRes==='BIG' ? 'SMALL' : 'BIG';
+      return { nextResult:next, nextNumber: next==='BIG'?(mostFreq>=5?mostFreq:7):(mostFreq<=4?mostFreq:2), confidence:88, name:'🔄 ALTERNATING', desc:'full sequence alternates' };
+    }
+    let streakLen=1, streakRes=results[results.length-1];
+    for (let i=results.length-2; i>=0; i--) {
+      if (results[i]===streakRes) streakLen++;
+      else break;
+    }
+    if (streakLen >= 3) {
+      const next = streakRes==='BIG' ? 'SMALL' : 'BIG';
+      return { nextResult:next, nextNumber: next==='BIG'?7:2, confidence: Math.min(90, 75+streakLen), name:`📊 ${streakLen}-STREAK REVERSAL`, desc:`${streakLen} consecutive ${streakRes}` };
+    }
+    let bb=0,bs=0,sb=0,ss=0;
+    for (let i=0; i<results.length-1; i++) {
+      if (results[i]==='BIG' && results[i+1]==='BIG') bb++;
+      else if (results[i]==='BIG' && results[i+1]==='SMALL') bs++;
+      else if (results[i]==='SMALL' && results[i+1]==='BIG') sb++;
+      else ss++;
+    }
+    let nextRes, conf;
+    if (lastRes==='BIG') {
+      const total = bb+bs;
+      const prob = total===0 ? 0.5 : bb/total;
+      nextRes = prob >= 0.5 ? 'BIG' : 'SMALL';
+      conf = 55 + Math.abs(prob-0.5)*70;
+    } else {
+      const total = sb+ss;
+      const prob = total===0 ? 0.5 : sb/total;
+      nextRes = prob >= 0.5 ? 'BIG' : 'SMALL';
+      conf = 55 + Math.abs(prob-0.5)*70;
+    }
+    conf = Math.min(92, Math.max(55, Math.round(conf)));
+    const range = nextRes==='BIG' ? [5,6,7,8,9] : [0,1,2,3,4];
+    let nextNum=range[0], best=0;
+    for (const r of range) if (freq[r]>best) { best=freq[r]; nextNum=r; }
+    if (best===0) nextNum = nextRes==='BIG' ? 7 : 2;
+    return { nextResult:nextRes, nextNumber:nextNum, confidence:conf, name:'🎲 MARKOV CHAIN', desc:'probability over full history' };
+  }
+
+  function initPaste() {
+    document.addEventListener('paste', async e => {
+      const items = e.clipboardData.items;
+      for (let i=0; i<items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = new File([items[i].getAsFile()], 'paste.png', { type: items[i].type });
+          await processImage(file);
+          break;
+        }
+      }
+    });
+    document.getElementById('pasteZone').addEventListener('click', () => alert('📋 Press Ctrl+V (or Cmd+V) to paste your screenshot'));
+  }
+
+  function initTabs() {
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab+'Tab').classList.add('active');
+      });
+    });
+  }
+
+  const widget = document.getElementById('widget');
+  const handle = document.getElementById('dragHandle');
+  let drag=false, sx, sy, lx, ly;
+  handle.addEventListener('mousedown', e => {
+    if (e.target.closest('button')) return;
+    drag=true; sx=e.clientX; sy=e.clientY;
+    const rect=widget.getBoundingClientRect(); lx=rect.left; ly=rect.top;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => { if (drag) { widget.style.left = (lx+(e.clientX-sx))+'px'; widget.style.top = (ly+(e.clientY-sy))+'px'; widget.style.right='auto'; } });
+  document.addEventListener('mouseup', () => drag=false);
+  document.getElementById('minimizeBtn').addEventListener('click', () => { const c = document.getElementById('content'); c.style.display = c.style.display==='none' ? 'block' : 'none'; });
+
+  document.getElementById('unlockBtn').addEventListener('click', () => {
+    const key = document.getElementById('vipKey').value.trim();
+    if (key==='HB12' || key==='VIP999') {
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('mainPanel').style.display = 'block';
+      initPaste(); initTabs(); updateScanTable(); refreshPredictionAndHistory();
+    } else alert('Invalid key');
+  });
+  document.getElementById('vipKey').addEventListener('keypress', e => { if(e.key==='Enter') document.getElementById('unlockBtn').click(); });
+})();
+
+// ==================== LIVE DATA + PERMANENT HISTORY ====================
+(function() {
+  let liveHistory = [];
+  let liveCurrentPage = 1;
+  const livePerPage = 15;
+  let liveAutoInterval = null;
+  let currentBalance = 0;
+
+  function loadLiveHistory() {
+    const saved = localStorage.getItem('wingo_live_history');
+    if (saved) {
+      try {
+        liveHistory = JSON.parse(saved);
+      } catch(e) { liveHistory = []; }
+    }
+    renderLiveTable();
+    updateLiveStats();
+  }
+  function saveLiveHistory() {
+    localStorage.setItem('wingo_live_history', JSON.stringify(liveHistory.slice(-500)));
+  }
+
+  function getNumberClassLive(num) {
+    if ([1,3,7,9].includes(num)) return 'num-green';
+    if ([2,4,6,8].includes(num)) return 'num-red';
+    if (num === 5) return 'num-five';
+    if (num === 0) return 'num-zero';
+    return '';
+  }
+  function getNumberDotsLive(num) {
+    if ([1,3,7,9].includes(num)) return '<span class="dot green-dot"></span>';
+    if ([2,4,6,8].includes(num)) return '<span class="dot red-dot"></span>';
+    if (num === 5) return '<span class="dot green-dot"></span><span class="dot purple-dot"></span>';
+    if (num === 0) return '<span class="dot red-dot"></span><span class="dot purple-dot"></span>';
+    return '—';
+  }
+
+  function renderLiveTable() {
+    const tbody = document.getElementById('liveTableBody');
+    const totalPages = Math.ceil(liveHistory.length / livePerPage) || 1;
+    if (liveHistory.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">No data yet. Click "Fetch Now".</td></tr>';
+      document.getElementById('livePagination').innerHTML = '';
+      return;
+    }
+    const sorted = [...liveHistory].sort((a,b) => (b.period || '').localeCompare(a.period || ''));
+    const start = (liveCurrentPage-1) * livePerPage;
+    const pageItems = sorted.slice(start, start + livePerPage);
+    let html = '';
+    for (const row of pageItems) {
+      const num = row.number;
+      const result = row.result || (num >=5 ? 'BIG' : 'SMALL');
+      const numClass = getNumberClassLive(num);
+      const resultClass = result === 'BIG' ? 'history-big' : 'history-small';
+      html += `<tr>
+        <td style="font-family:monospace;">${row.period || '—'}</td>
+        <td class="history-num ${numClass}">${num}</td>
+        <td class="${resultClass}">${result}</td>
+        <td>${getNumberDotsLive(num)}</td>
+      </tr>`;
+    }
+    tbody.innerHTML = html;
+
+    const container = document.getElementById('livePagination');
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+    const go = p => { liveCurrentPage = p; renderLiveTable(); };
+    let pagHtml = `<button class="page-btn" id="liveFirst" ${liveCurrentPage===1?'disabled':''}>⏮</button>
+                   <button class="page-btn" id="livePrev" ${liveCurrentPage===1?'disabled':''}>◀</button>`;
+    for (let i = Math.max(1, liveCurrentPage-2); i <= Math.min(totalPages, liveCurrentPage+2); i++) {
+      pagHtml += `<button class="page-num ${i===liveCurrentPage?'active':''}" data-page="${i}">${i}</button>`;
+    }
+    pagHtml += `<button class="page-btn" id="liveNext" ${liveCurrentPage===totalPages?'disabled':''}>▶</button>
+                <button class="page-btn" id="liveLast" ${liveCurrentPage===totalPages?'disabled':''}>⏭</button>`;
+    container.innerHTML = pagHtml;
+    document.getElementById('liveFirst')?.addEventListener('click', () => go(1));
+    document.getElementById('livePrev')?.addEventListener('click', () => go(Math.max(1, liveCurrentPage-1)));
+    document.getElementById('liveNext')?.addEventListener('click', () => go(Math.min(totalPages, liveCurrentPage+1)));
+    document.getElementById('liveLast')?.addEventListener('click', () => go(totalPages));
+    document.querySelectorAll('#livePagination .page-num').forEach(btn => {
+      btn.addEventListener('click', () => go(parseInt(btn.dataset.page)));
+    });
+  }
+
+  function updateLiveStats() {
+    document.getElementById('liveTotalCount').innerText = liveHistory.length;
+    document.getElementById('liveBalance').innerText = currentBalance.toFixed(2);
+  }
+
+  async function fetchLiveData() {
+    const proxyUrl = document.getElementById('proxyUrl').value.trim();
+    const errorDiv = document.getElementById('liveErrorMsg');
+    if (!proxyUrl) {
+      errorDiv.style.display = 'block';
+      errorDiv.innerHTML = '❌ Please enter a proxy URL (backend server). Direct API URL will not work.';
+      return;
+    }
+    errorDiv.style.display = 'none';
+    document.getElementById('liveTableBody').innerHTML = '<tr><td colspan="4">⏳ Fetching...</td></tr>';
+    try {
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Proxy returned error');
+      const newHistory = data.history || [];
+      currentBalance = data.balance || 0;
+      const existingPeriods = new Set(liveHistory.map(h => h.period));
+      let added = 0;
+      for (const item of newHistory) {
+        if (item.period && !existingPeriods.has(item.period)) {
+          liveHistory.push(item);
+          existingPeriods.add(item.period);
+          added++;
+        }
+      }
+      liveHistory.sort((a,b) => (a.period || '').localeCompare(b.period || ''));
+      saveLiveHistory();
+      renderLiveTable();
+      updateLiveStats();
+      document.getElementById('liveTimestamp').innerText = new Date().toLocaleTimeString();
+      if (added) {
+        document.getElementById('liveTableBody').innerHTML = '<td><td colspan="4">✅ Data refreshed – table updated</td></tr>';
+        setTimeout(() => renderLiveTable(), 500);
+      } else {
+        renderLiveTable();
+      }
+    } catch (err) {
+      console.error(err);
+      errorDiv.style.display = 'block';
+      errorDiv.innerHTML = `❌ Proxy error: ${err.message}<br>Make sure your proxy is running and the URL is correct.`;
+      document.getElementById('liveTableBody').innerHTML = `<tr><td colspan="4">❌ Connection failed. Check proxy.</td></tr>`;
+    }
+  }
+
+  function toggleAutoRefresh() {
+    if (liveAutoInterval) {
+      clearInterval(liveAutoInterval);
+      liveAutoInterval = null;
+      document.getElementById('toggleAutoLiveBtn').innerHTML = '▶️ Auto (5s)';
+    } else {
+      fetchLiveData();
+      liveAutoInterval = setInterval(fetchLiveData, 5000);
+      document.getElementById('toggleAutoLiveBtn').innerHTML = '⏸️ Auto (5s)';
+    }
+  }
+
+  function exportLiveCSV() {
+    if (!liveHistory.length) { alert('No live data to export'); return; }
+    const headers = ['Period', 'Number', 'Result'];
+    const rows = liveHistory.map(r => [r.period, r.number, r.result || (r.number>=5 ? 'BIG' : 'SMALL')]);
+    const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wingo_live_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function clearLiveHistory() {
+    if (confirm('⚠️ Delete all permanently saved live data? This cannot be undone.')) {
+      liveHistory = [];
+      saveLiveHistory();
+      renderLiveTable();
+      updateLiveStats();
+      document.getElementById('liveTimestamp').innerText = '--';
+      currentBalance = 0;
+      updateLiveStats();
+    }
+  }
+
+  document.getElementById('fetchLiveBtn').addEventListener('click', fetchLiveData);
+  document.getElementById('toggleAutoLiveBtn').addEventListener('click', toggleAutoRefresh);
+  document.getElementById('exportLiveCsvBtn').addEventListener('click', exportLiveCSV);
+  document.getElementById('clearLiveHistoryBtn').addEventListener('click', clearLiveHistory);
+
+  loadLiveHistory();
+})();
+</script>
+</body>
+</html>
