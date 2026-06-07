@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>WINGO · PATTERN ANALYZER + PREDICTION HISTORY</title>
+  <title>WINGO · PRECISE PATTERN AI + HISTORY</title>
   <style>
     * {
       margin: 0;
@@ -339,10 +339,6 @@
       margin: 10px 0;
       text-align: center;
     }
-    .accuracy-badge {
-      color: #44ffaa;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -351,7 +347,7 @@
 
 <div class="widget" id="widget">
   <div class="widget-header" id="dragHandle">
-    <h3>⚡ WINGO · PATTERN ANALYZER</h3>
+    <h3>⚡ WINGO · PRECISE PATTERN AI</h3>
     <button id="minimizeBtn">−</button>
   </div>
   <div id="content">
@@ -400,12 +396,16 @@
       </div>
       <div class="panel" id="historyTab">
         <div class="info-note">
-          📜 PREDICTION HISTORY (last 50) — accuracy shown after round ends
+          📜 PREDICTION HISTORY — ✅ = correct, ❌ = incorrect
         </div>
         <div class="history-table-wrap">
           <table class="history-table">
-            <thead><tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>ACCURACY</th></thead>
-            <tbody id="historyTableBody"><tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr></tbody>
+            <thead>
+              <tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>MATCH</th></tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -421,8 +421,10 @@
   let roundSyncActive = false;
   let currentPrediction = null;   // stable prediction for current round
   let currentPredictedNumber = null;
-  let lastFetchTime = 0;
-  let timerAnimationId = null;
+  let lastFetchBoundary = -1;     // prevent double fetch
+  let animationFrame = null;
+  let lastPatternName = "pattern detection";
+  let lastConfidence = 0.7;
 
   // Drag widget
   const widget = document.getElementById('widget');
@@ -446,7 +448,7 @@
   });
   document.addEventListener('mouseup', () => { drag = false; });
 
-  // Helper: dots & colors for table
+  // ----- Helper: dots & colors for table -----
   function getDotHtml(num) {
     const n = parseInt(num);
     let dots = [];
@@ -465,20 +467,22 @@
     return '';
   }
 
+  // Persistence
   function loadLiveHistory() {
-    const saved = localStorage.getItem('wingo_pattern_v3');
+    const saved = localStorage.getItem('wingo_pattern_v4');
     if (saved) try { liveHistory = JSON.parse(saved); } catch(e) { liveHistory = []; }
-    const savedPred = localStorage.getItem('wingo_pred_history');
+    const savedPred = localStorage.getItem('wingo_pred_history_v4');
     if (savedPred) try { predictionHistory = JSON.parse(savedPred); } catch(e) { predictionHistory = []; }
     renderLiveTable();
     renderHistoryTable();
-    // initial prediction (will be updated after fetch)
+    if (liveHistory.length > 0) generateStablePrediction(); // initial prediction
+    else updateUIDefault();
   }
   function saveLiveHistory() {
-    localStorage.setItem('wingo_pattern_v3', JSON.stringify(liveHistory.slice(-500)));
+    localStorage.setItem('wingo_pattern_v4', JSON.stringify(liveHistory.slice(-500)));
   }
   function savePredictionHistory() {
-    localStorage.setItem('wingo_pred_history', JSON.stringify(predictionHistory.slice(-200)));
+    localStorage.setItem('wingo_pred_history_v4', JSON.stringify(predictionHistory.slice(-200)));
   }
 
   function renderLiveTable() {
@@ -512,28 +516,33 @@
     }
     let html = '';
     predictionHistory.slice(0, 50).forEach(p => {
-      const correctText = p.correct ? '✅' : '❌';
+      const correctMark = p.correct ? '✅' : '❌';
       const actualClass = p.actualResult ? (p.actualResult === 'BIG' ? 'big-result' : 'small-result') : '';
       html += `<tr>
         <td style="font-family:monospace;">${p.period}</td>
         <td class="${p.predictedResult === 'BIG' ? 'big-result' : 'small-result'}">${p.predictedResult}</td>
         <td class="${getNumberClass(p.predictedNumber)}"><strong>${p.predictedNumber}</strong></td>
         <td class="${actualClass}">${p.actualResult || 'pending'} ${p.actualNumber !== undefined ? p.actualNumber : ''}</td>
-        <td>${correctText}</td>
+        <td>${correctMark}</td>
       </tr>`;
     });
     tbody.innerHTML = html;
   }
 
+  // ----- Future period (increment last period correctly) -----
   function getNextPeriod() {
     if (liveHistory.length === 0) return "----";
     const latestPeriod = liveHistory[0].period;
-    let numericMatch = latestPeriod.match(/\d+$/);
-    if (numericMatch) {
-      let numPart = numericMatch[0];
-      let incremented = (parseInt(numPart) + 1).toString();
-      while (incremented.length < numPart.length) incremented = "0" + incremented;
-      return latestPeriod.slice(0, latestPeriod.length - numPart.length) + incremented;
+    // Find trailing numeric part (digits at the end)
+    const match = latestPeriod.match(/\d+$/);
+    if (match) {
+      let numStr = match[0];
+      let num = parseInt(numStr, 10);
+      let nextNum = num + 1;
+      let nextNumStr = nextNum.toString();
+      // Pad with leading zeros to keep same length
+      while (nextNumStr.length < numStr.length) nextNumStr = "0" + nextNumStr;
+      return latestPeriod.slice(0, latestPeriod.length - numStr.length) + nextNumStr;
     }
     return latestPeriod + "+1";
   }
@@ -543,49 +552,40 @@
     return history.map(h => h.result === 'SMALL' ? 'A' : 'B');
   }
 
-  // Extended pattern list based on user's rules
   const patterns = [
-    { name: "1A1B (ABAB)", regex: /^(AB)+$/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A' },
+    { name: "1A1B (ABAB)", regex: /^(AB)+$/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.75 },
     { name: "2A2B (AABB)", regex: /^(AABB)+$/, next: (seq) => {
       let last = seq.slice(-2).join('');
       if (last === 'AA') return 'B';
       if (last === 'BB') return 'A';
-      if (last === 'AB') return 'B';
       return 'A';
-    } },
+    }, weight: 0.7 },
     { name: "3A3B (AAABBB)", regex: /^(AAABBB)+$/, next: (seq) => {
       let lastThree = seq.slice(-3).join('');
       if (lastThree === 'AAA') return 'B';
       if (lastThree === 'BBB') return 'A';
-      if (lastThree === 'AAB') return 'B';
       return 'A';
-    } },
-    { name: "4A4B (AAAABBBB)", regex: /^(AAAABBBB)+$/, next: (seq) => seq.slice(-4).join('') === 'AAAA' ? 'B' : 'A' },
-    { name: "1A2B (ABBABB)", regex: /^(ABB)+$/, next: (seq) => {
-      let last = seq.slice(-3).join('');
-      if (last === 'ABB') return 'A';
-      return 'B';
-    } },
-    { name: "2A1B (AABAAB)", regex: /^(AAB)+$/, next: (seq) => seq.slice(-2).join('') === 'AA' ? 'B' : 'A' },
-    { name: "1A3B (ABBBABBB)", regex: /^(ABBB)+$/, next: (seq) => seq.slice(-4).join('') === 'ABBB' ? 'A' : 'B' },
-    { name: "3A1B (AAABAAAB)", regex: /^(AAAB)+$/, next: (seq) => seq.slice(-3).join('') === 'AAA' ? 'B' : 'A' },
-    { name: "Long streak A", regex: /^A{5,}$/, next: () => 'B', confidence: 0.8 },
-    { name: "Long streak B", regex: /^B{5,}$/, next: () => 'A', confidence: 0.8 },
-    { name: "Mirror trend (alternating long)", regex: /^ABABABAB/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', confidence: 0.75 }
+    }, weight: 0.7 },
+    { name: "4A4B (AAAABBBB)", regex: /^(AAAABBBB)+$/, next: (seq) => seq.slice(-4).join('') === 'AAAA' ? 'B' : 'A', weight: 0.7 },
+    { name: "1A2B (ABBABB)", regex: /^(ABB)+$/, next: (seq) => seq.slice(-3).join('') === 'ABB' ? 'A' : 'B', weight: 0.7 },
+    { name: "2A1B (AABAAB)", regex: /^(AAB)+$/, next: (seq) => seq.slice(-2).join('') === 'AA' ? 'B' : 'A', weight: 0.7 },
+    { name: "1A3B (ABBBABBB)", regex: /^(ABBB)+$/, next: (seq) => seq.slice(-4).join('') === 'ABBB' ? 'A' : 'B', weight: 0.7 },
+    { name: "3A1B (AAABAAAB)", regex: /^(AAAB)+$/, next: (seq) => seq.slice(-3).join('') === 'AAA' ? 'B' : 'A', weight: 0.7 },
+    { name: "Long streak A (≥5)", regex: /^A{5,}$/, next: () => 'B', weight: 0.85 },
+    { name: "Long streak B (≥5)", regex: /^B{5,}$/, next: () => 'A', weight: 0.85 },
+    { name: "Mirror trend", regex: /^ABABABAB/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.75 }
   ];
 
   function detectPattern(abSeq) {
     if (abSeq.length < 2) return null;
-    // try each pattern on the full sequence or last 12 chars
     let testSeq = abSeq.join('');
     for (let p of patterns) {
-      if (p.regex.test(testSeq) || (testSeq.length > 10 && p.regex.test(testSeq.slice(-12)))) {
+      if (p.regex.test(testSeq) || (testSeq.length > 12 && p.regex.test(testSeq.slice(-12)))) {
         let next = p.next(abSeq);
-        let conf = p.confidence || 0.7;
-        return { pattern: p.name, next, confidence: conf };
+        return { pattern: p.name, next, confidence: p.weight };
       }
     }
-    // fallback: weighted recent majority
+    // fallback: weighted recent majority (last 6)
     let recent = abSeq.slice(0,6);
     let aCount = recent.filter(c => c === 'A').length;
     let bCount = recent.length - aCount;
@@ -594,7 +594,6 @@
     return { pattern: "Weighted recency", next, confidence: conf };
   }
 
-  // predict number using frequency with penalty for last number
   function predictNumber(history) {
     if (history.length === 0) return { number: 5, conf: 0.5 };
     const lastNum = history[0].number;
@@ -606,7 +605,7 @@
       scores[num] += weight;
       totalWeight += weight;
     }
-    // penalize last number heavily
+    // Penalize last number to avoid repetition
     scores[lastNum] *= 0.6;
     let bestNum = 0, bestScore = -1;
     for (let i=0;i<10;i++) {
@@ -619,26 +618,27 @@
     return { number: bestNum, conf: Math.min(0.85, confidence + 0.1) };
   }
 
-  // generate stable prediction based on current history (called only at round end)
   function generateStablePrediction() {
     if (liveHistory.length === 0) {
       currentPrediction = 'BIG';
       currentPredictedNumber = 5;
+      lastPatternName = "Initial";
+      lastConfidence = 0.5;
       return;
     }
     const abSeq = convertToAB(liveHistory);
     const patternResult = detectPattern(abSeq);
     let predictedResult = patternResult.next === 'A' ? 'SMALL' : 'BIG';
-    let confidence = patternResult.confidence;
-    // number prediction
+    let patternConf = patternResult.confidence;
     const numPred = predictNumber(liveHistory);
     let predictedNumber = numPred.number;
     let numConf = numPred.conf;
-    let overallConf = (confidence + numConf) / 2;
+    let overallConf = (patternConf + numConf) / 2;
     overallConf = Math.min(0.94, Math.max(0.52, overallConf));
     currentPrediction = predictedResult;
     currentPredictedNumber = predictedNumber;
-    return { pred: predictedResult, number: predictedNumber, conf: overallConf, patternName: patternResult.pattern };
+    lastPatternName = patternResult.pattern;
+    lastConfidence = overallConf;
   }
 
   function updateUIWithCurrentPrediction() {
@@ -647,11 +647,10 @@
     const smallCount = liveHistory.length - bigCount;
     document.getElementById('bigStat').innerText = bigCount;
     document.getElementById('smallStat').innerText = smallCount;
-    // confidence from last generate (stored)
-    let confPercent = 70;
-    if (window._lastConf) confPercent = window._lastConf;
+    const confPercent = Math.floor(lastConfidence * 100);
     document.getElementById('confStat').innerText = `${confPercent}%`;
     document.getElementById('confidenceFill').style.width = `${confPercent}%`;
+
     // display prediction
     const displayData = getNumberDisplayData(currentPredictedNumber);
     let dotHtml = '';
@@ -672,9 +671,9 @@
         <div class="prediction-number ${displayData.textClass}">${currentPredictedNumber}</div>
       </div>
     `;
-    const patternName = window._lastPattern || 'pattern detection';
     document.getElementById('trendName').innerHTML = `🎯 ${currentPrediction} · Predicted ${currentPredictedNumber}`;
-    document.getElementById('trendDesc').innerHTML = `🧠 ${patternName} | Full history: ${liveHistory.length} rounds | Last actual: ${liveHistory[0]?.result || '?'} ${liveHistory[0]?.number || '?'}`;
+    const lastActual = liveHistory[0] ? `${liveHistory[0].result} ${liveHistory[0].number}` : 'none';
+    document.getElementById('trendDesc').innerHTML = `🧠 ${lastPatternName} | ${liveHistory.length} rounds | Last actual: ${lastActual}`;
     document.getElementById('futurePeriodDisplay').innerText = getNextPeriod();
   }
 
@@ -686,12 +685,21 @@
     return { dotClass: "", dual: false, textClass: "" };
   }
 
-  // called when new round data arrives
+  function updateUIDefault() {
+    document.getElementById('bigStat').innerText = '0';
+    document.getElementById('smallStat').innerText = '0';
+    document.getElementById('confStat').innerText = '0%';
+    document.getElementById('confidenceFill').style.width = '0%';
+    document.getElementById('predictionArea').innerHTML = '<div class="prediction-row">---</div>';
+    document.getElementById('trendName').innerHTML = '📊 AWAITING DATA';
+    document.getElementById('trendDesc').innerHTML = 'Fetching first rounds...';
+    document.getElementById('futurePeriodDisplay').innerText = '----';
+  }
+
+  // called when new round data arrives (after fetch)
   function onNewRoundData() {
-    // before updating prediction, check if we have a previous prediction for the round that just ended
     if (liveHistory.length > 0 && currentPrediction) {
       const latestRound = liveHistory[0];
-      // add to prediction history if not already logged for this period
       const existing = predictionHistory.find(p => p.period === latestRound.period);
       if (!existing) {
         predictionHistory.unshift({
@@ -706,20 +714,17 @@
         renderHistoryTable();
       }
     }
-    // generate NEW prediction for the upcoming round
-    const result = generateStablePrediction();
-    window._lastConf = Math.floor(result.conf * 100);
-    window._lastPattern = result.patternName;
+    generateStablePrediction();
     updateUIWithCurrentPrediction();
   }
 
-  // ----- SILENT FETCH (only at round end) -----
+  // ----- SILENT FETCH (only at round boundaries) -----
   async function fetchLiveData() {
     try {
       const res = await fetch(FIXED_API_URL);
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (!data.success) return;
+      if (!data.success) throw new Error(data.error);
       const newHistory = data.history || [];
       const existingSet = new Set(liveHistory.map(h => h.period));
       let added = 0;
@@ -740,20 +745,25 @@
         liveHistory.sort((a,b) => String(b.period).localeCompare(String(a.period)));
         saveLiveHistory();
         renderLiveTable();
-        onNewRoundData();   // prediction updates only here
+        onNewRoundData();
       }
-    } catch (err) { /* silent */ }
+    } catch (err) {
+      // silent, will retry next boundary
+      console.warn(err);
+    }
   }
 
-  // ----- PRECISE TIMER (exact round end) -----
-  function startTimerAndSync() {
-    let lastSecond = -1;
+  // ----- PRECISE TIMER + SYNC (exact round end) -----
+  let lastTriggeredSecond = -1;
+  function startTimerLoop() {
     function tick() {
-      if (!roundSyncActive) return;
+      if (!roundSyncActive) {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        return;
+      }
       const now = new Date();
       const ms = now.getMilliseconds();
       const sec = now.getSeconds();
-      // update display every frame
       let remaining;
       if (sec < 30) remaining = 30 - sec - (ms / 1000);
       else remaining = 60 - sec - (ms / 1000);
@@ -763,26 +773,26 @@
         timerElem.innerText = `${Math.ceil(remaining)}s`;
         timerElem.style.color = remaining <= 3 ? '#ff8866' : '#ffcc88';
       }
-      // fetch exactly at round end (0 or 30 seconds) within 50ms window
-      if ((sec === 0 && ms < 80) || (sec === 30 && ms < 80)) {
-        if (lastSecond !== sec) {
-          lastSecond = sec;
+      // Trigger fetch exactly at round end (within 80ms window)
+      if ((sec === 0 || sec === 30) && ms < 80) {
+        if (lastTriggeredSecond !== sec) {
+          lastTriggeredSecond = sec;
           fetchLiveData();
         }
       } else {
-        if (sec !== 0 && sec !== 30) lastSecond = -1;
+        if (sec !== 0 && sec !== 30) lastTriggeredSecond = -1;
       }
-      timerAnimationId = requestAnimationFrame(tick);
+      animationFrame = requestAnimationFrame(tick);
     }
-    if (timerAnimationId) cancelAnimationFrame(timerAnimationId);
-    timerAnimationId = requestAnimationFrame(tick);
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    animationFrame = requestAnimationFrame(tick);
   }
 
   function startAutoSync() {
     if (roundSyncActive) return;
     roundSyncActive = true;
-    fetchLiveData(); // initial fetch + prediction
-    startTimerAndSync();
+    fetchLiveData(); // initial fetch
+    startTimerLoop();
   }
 
   // UI Boot
@@ -810,3 +820,5 @@
 </script>
 </body>
 </html>
+
+https://livewingo30.vercel.app/api/wingo proxy url
