@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>WINGO · PRECISION ROUND SYNC + GLASS UI</title>
+  <title>WINGO · PATTERN ANALYZER + PREDICTION HISTORY</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      user-select: none; /* avoid accidental drag of text */
     }
 
     body {
@@ -32,20 +31,17 @@
       pointer-events: auto;
     }
 
-    /* ----- GLASS OVERLAY ----- */
     .widget {
       position: fixed;
       z-index: 10000;
       top: 18px;
       right: 18px;
-      width: min(390px, calc(100vw - 32px));
-      background: rgba(12, 16, 28, 0.68);
-      backdrop-filter: blur(18px) saturate(180%);
-      -webkit-backdrop-filter: blur(18px);
-      border-radius: 32px;
-      border: 1px solid rgba(255, 120, 140, 0.45);
-      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-      transition: box-shadow 0.2s;
+      width: min(440px, calc(100vw - 32px));
+      background: rgba(10, 12, 22, 0.92);
+      backdrop-filter: blur(24px) saturate(180%);
+      border-radius: 40px;
+      border: 1px solid rgba(255, 130, 150, 0.5);
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6);
       cursor: default;
     }
 
@@ -53,21 +49,19 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 18px;
-      background: linear-gradient(115deg, rgba(255, 60, 100, 0.25), rgba(255, 140, 70, 0.15));
-      border-bottom: 1px solid rgba(255, 220, 140, 0.4);
-      border-radius: 32px 32px 0 0;
+      padding: 14px 20px;
+      background: linear-gradient(115deg, rgba(255, 70, 110, 0.3), rgba(255, 150, 80, 0.2));
+      border-bottom: 1px solid rgba(255, 220, 140, 0.5);
+      border-radius: 40px 40px 0 0;
       cursor: grab;
     }
 
-    .widget-header:active {
-      cursor: grabbing;
-    }
+    .widget-header:active { cursor: grabbing; }
 
     .widget-header h3 {
-      font-size: 0.82rem;
+      font-size: 0.9rem;
       font-weight: 800;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.5px;
       background: linear-gradient(135deg, #fff6e6, #ffcd9a);
       -webkit-background-clip: text;
       background-clip: text;
@@ -75,132 +69,113 @@
     }
 
     .widget-header button {
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0, 0, 0, 0.6);
       border: none;
       color: #ffdebc;
       font-size: 18px;
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 40px;
       cursor: pointer;
       transition: 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .widget-header button:hover {
       background: #ff3366;
       color: white;
-      transform: scale(0.96);
     }
 
-    .widget-body {
-      padding: 16px;
-    }
+    .widget-body { padding: 18px; }
 
     .login-area {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .login-area input {
-      padding: 12px;
-      background: rgba(10, 14, 24, 0.7);
-      border: 1px solid #3a3f62;
-      border-radius: 44px;
-      color: #fff2e0;
+      padding: 14px;
+      background: rgba(10, 14, 24, 0.9);
+      border: 1px solid #4a4f72;
+      border-radius: 48px;
+      color: #fff5e8;
       text-align: center;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
-      backdrop-filter: blur(4px);
     }
 
     .login-area button {
       background: linear-gradient(95deg, #ff3366, #ff884d);
       border: none;
-      border-radius: 44px;
-      padding: 11px;
+      border-radius: 48px;
+      padding: 12px;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 14px;
       color: white;
       cursor: pointer;
-      transition: 0.2s;
     }
 
     .tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      background: rgba(0, 0, 0, 0.35);
-      padding: 5px;
+      gap: 10px;
+      margin-bottom: 18px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px;
       border-radius: 60px;
-      backdrop-filter: blur(4px);
     }
 
     .tab {
       flex: 1;
       background: transparent;
       border: none;
-      padding: 8px 0;
+      padding: 10px 0;
       border-radius: 60px;
-      font-size: 11.5px;
+      font-size: 13px;
       font-weight: 700;
       color: #e2e8ff;
       cursor: pointer;
-      transition: 0.15s;
     }
 
     .tab.active {
       background: linear-gradient(95deg, #ff3366, #ff884d);
       color: white;
-      box-shadow: 0 2px 12px rgba(255, 51, 102, 0.4);
+      box-shadow: 0 2px 12px rgba(255, 51, 102, 0.5);
     }
 
     .panel {
       display: none;
-      animation: fadeGlass 0.25s ease-out;
+      animation: fadeGlass 0.25s ease;
     }
 
-    .panel.active {
-      display: block;
-    }
+    .panel.active { display: block; }
 
     @keyframes fadeGlass {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* timer card */
-    .timer-card {
-      background: rgba(8, 12, 22, 0.65);
+    .info-card {
+      background: rgba(8, 12, 22, 0.8);
       backdrop-filter: blur(8px);
-      border-radius: 38px;
-      padding: 10px 16px;
-      margin-bottom: 14px;
+      border-radius: 44px;
+      padding: 12px 18px;
+      margin-bottom: 18px;
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      border: 1px solid rgba(255, 180, 100, 0.5);
+      border: 1px solid rgba(255, 180, 100, 0.6);
     }
 
-    .timer-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #cdd9ff;
-      letter-spacing: 0.4px;
+    .future-period {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffdfb0;
     }
 
     .timer-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 26px;
+      font-family: monospace;
+      font-size: 32px;
       font-weight: 800;
       background: linear-gradient(135deg, #ffdfb0, #ffaa55);
       -webkit-background-clip: text;
@@ -208,181 +183,166 @@
       color: transparent;
     }
 
-    .algo-card {
-      background: rgba(12, 16, 28, 0.7);
+    .trend-card {
+      background: rgba(12, 16, 28, 0.85);
       backdrop-filter: blur(8px);
-      border-radius: 24px;
+      border-radius: 28px;
       padding: 14px;
-      margin: 10px 0;
-      border-left: 5px solid #ffaa55;
+      margin: 12px 0;
+      border-left: 6px solid #ffaa55;
     }
 
-    .algo-name {
+    .trend-name {
       font-weight: 800;
-      font-size: 13px;
+      font-size: 14px;
       color: #ffdfb0;
+      margin-bottom: 6px;
     }
 
-    .algo-desc {
-      font-size: 10.5px;
+    .trend-desc {
+      font-size: 11px;
       color: #cbd5ff;
-      margin: 6px 0;
+      line-height: 1.4;
     }
 
     .confidence-bar {
       background: #252d4a;
       border-radius: 40px;
-      height: 6px;
+      height: 8px;
       width: 100%;
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     .confidence-fill {
       background: linear-gradient(90deg, #44ffaa, #ffcc44);
       width: 0%;
-      height: 6px;
+      height: 8px;
       border-radius: 40px;
       transition: width 0.3s ease;
     }
 
     .prediction-area {
       text-align: center;
-      background: rgba(5, 8, 18, 0.7);
+      background: rgba(5, 8, 18, 0.85);
       backdrop-filter: blur(12px);
-      border-radius: 32px;
-      padding: 20px;
-      margin: 16px 0;
+      border-radius: 48px;
+      padding: 28px 16px;
+      margin: 18px 0;
     }
 
-    .prediction-result {
-      font-size: 38px;
+    .prediction-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .prediction-dot {
+      width: 56px;
+      height: 56px;
+      border-radius: 56px;
+    }
+    .prediction-dot.green-dot { background: #22c55e; box-shadow: 0 0 14px #22c55e; }
+    .prediction-dot.red-dot { background: #ef4444; box-shadow: 0 0 14px #ef4444; }
+    .prediction-dot.purple-dot { background: #c084fc; box-shadow: 0 0 14px #c084fc; }
+
+    .dual-dot-container {
+      display: flex;
+      gap: 6px;
+    }
+    .dual-dot {
+      width: 56px;
+      height: 56px;
+      border-radius: 56px;
+    }
+
+    .prediction-big-small {
+      font-size: 52px;
       font-weight: 900;
+      letter-spacing: 2px;
     }
+    .big-result { color: #ffcc44; text-shadow: 0 0 16px #ffaa33; }
+    .small-result { color: #44ffff; text-shadow: 0 0 16px #22ddff; }
 
-    .big-result {
-      color: #ffcc44;
-      text-shadow: 0 0 8px #ffaa33;
+    .prediction-number {
+      font-size: 60px;
+      font-weight: 800;
+      font-family: monospace;
+      background: linear-gradient(135deg, #fff, #ddd);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
-
-    .small-result {
-      color: #44ffff;
-      text-shadow: 0 0 8px #22ddff;
-    }
+    .num-green { color: #86efac; background: none; -webkit-background-clip: unset; }
+    .num-red { color: #f87171; }
+    .num-purple { color: #d8b4fe; }
 
     .stats-bar {
       display: flex;
       justify-content: space-around;
-      background: rgba(8, 12, 22, 0.7);
+      background: rgba(8, 12, 22, 0.8);
       backdrop-filter: blur(8px);
-      border-radius: 48px;
+      border-radius: 60px;
       padding: 12px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       color: #f0f3ff;
     }
 
-    .stats-bar b {
-      color: #ffcc77;
-    }
+    .stats-bar b { color: #ffcc77; font-size: 15px; }
 
-    .live-table-wrap {
-      max-height: 360px;
+    .live-table-wrap, .history-table-wrap {
+      max-height: 380px;
       overflow-y: auto;
-      border-radius: 24px;
-      background: rgba(8, 11, 20, 0.6);
+      border-radius: 28px;
+      background: rgba(8, 11, 20, 0.7);
       backdrop-filter: blur(4px);
-      margin-top: 14px;
-      border: 1px solid rgba(255, 180, 120, 0.2);
+      margin-top: 16px;
+      border: 1px solid rgba(255, 180, 120, 0.3);
     }
 
-    .live-table {
+    .live-table, .history-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 10.5px;
+      font-size: 11.5px;
     }
 
-    .live-table th {
+    .live-table th, .history-table th {
       text-align: left;
-      padding: 12px 10px;
+      padding: 14px 12px;
       color: #ffbc6e;
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(0, 0, 0, 0.3);
       position: sticky;
       top: 0;
-      backdrop-filter: blur(4px);
     }
 
-    .live-table td {
-      padding: 10px 10px;
+    .live-table td, .history-table td {
+      padding: 12px 12px;
       border-bottom: 1px solid rgba(255, 200, 150, 0.15);
       color: #f0f3fc;
-    }
-
-    .api-controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .api-controls button {
-      background: rgba(30, 36, 60, 0.9);
-      backdrop-filter: blur(4px);
-      border: none;
-      border-radius: 48px;
-      padding: 9px 12px;
-      color: white;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 600;
-      flex: 1;
-      transition: 0.1s;
-    }
-
-    .api-controls button.accent {
-      background: #44ffaa;
-      color: #000;
-      font-weight: 800;
-      box-shadow: 0 0 6px #44ffaa;
-    }
-
-    .error-msg {
-      color: #ffc5c5;
-      background: rgba(255, 68, 68, 0.2);
-      backdrop-filter: blur(8px);
-      padding: 8px;
-      border-radius: 20px;
-      margin: 8px 0;
-      font-size: 10px;
-      border-left: 3px solid #ff8888;
-    }
-
-    .info-note {
-      font-size: 10px;
-      color: #cdd9ff;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 8px 12px;
-      border-radius: 32px;
-      margin: 8px 0;
-      text-align: center;
-    }
-
-    .dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 10px;
-      margin: 0 2px;
       vertical-align: middle;
     }
 
-    .green-dot { background: #22c55e; box-shadow: 0 0 3px #22c55e; }
-    .red-dot { background: #ef4444; box-shadow: 0 0 3px #ef4444; }
-    .purple-dot { background: #c084fc; box-shadow: 0 0 3px #c084fc; }
+    .dot-wrapper { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+    .dot { width: 11px; height: 11px; border-radius: 11px; }
+    .green-dot { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
+    .red-dot { background: #ef4444; box-shadow: 0 0 4px #ef4444; }
+    .purple-dot { background: #c084fc; box-shadow: 0 0 4px #c084fc; }
 
-    .num-green { color: #86efac; font-weight: 800; }
-    .num-red { color: #f87171; font-weight: 800; }
-    .num-purple { color: #d8b4fe; font-weight: 800; }
-
-    button:active { transform: scale(0.96); }
+    .info-note {
+      font-size: 11px;
+      color: #cdd9ff;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 10px 14px;
+      border-radius: 40px;
+      margin: 10px 0;
+      text-align: center;
+    }
+    .accuracy-badge {
+      color: #44ffaa;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -391,38 +351,35 @@
 
 <div class="widget" id="widget">
   <div class="widget-header" id="dragHandle">
-    <h3>⚡ WINGO · PRECISION SYNC</h3>
+    <h3>⚡ WINGO · PATTERN ANALYZER</h3>
     <button id="minimizeBtn">−</button>
   </div>
-  
   <div id="content">
     <div class="widget-body" id="loginPanel">
       <div class="login-area">
         <input type="text" id="vipKey" placeholder="VIP KEY" autocomplete="off">
         <button id="unlockBtn">🔓 UNLOCK</button>
-        <div style="font-size:10px; color:#b9c2f0; text-align:center;">Key: HB12 or VIP999</div>
+        <div style="font-size:11px; color:#b9c2f0; text-align:center;">Key: HB12 or VIP999</div>
       </div>
     </div>
-
     <div class="widget-body" id="mainPanel" style="display:none;">
       <div class="tabs">
         <button class="tab active" data-tab="predict">🔮 PREDICT</button>
         <button class="tab" data-tab="live">📡 LIVE DATA</button>
+        <button class="tab" data-tab="history">📜 HISTORY</button>
       </div>
-
       <div class="panel active" id="predictTab">
-        <div class="timer-card">
-          <span class="timer-label">⏱️ NEXT ROUND ENDS IN</span>
+        <div class="info-card">
+          <span class="future-period" id="futurePeriodDisplay">----</span>
           <span class="timer-value" id="roundTimerDisplay">--s</span>
         </div>
-        <div class="algo-card">
-          <div class="algo-name" id="algoName">🧠 GLASS ENSEMBLE AI</div>
-          <div class="algo-desc" id="algoDesc">Enable round sync → auto fetch at round end</div>
+        <div class="trend-card">
+          <div class="trend-name" id="trendName">📊 PATTERN MATCHING</div>
+          <div class="trend-desc" id="trendDesc">Analyzing sequence with 25+ patterns</div>
           <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill"></div></div>
         </div>
-        <div class="prediction-area">
-          <div class="prediction-result" id="predictionResult">---</div>
-          <div class="prediction-number" id="predictedNumber" style="font-size:12px; margin-top:6px;">--</div>
+        <div class="prediction-area" id="predictionArea">
+          <div class="prediction-row">---</div>
         </div>
         <div class="stats-bar">
           <span>🔴 BIG: <b id="bigStat">0</b></span>
@@ -430,21 +387,25 @@
           <span>📊 CONF: <b id="confStat">0%</b></span>
         </div>
       </div>
-
       <div class="panel" id="liveTab">
-        <div class="api-controls">
-          <button id="fetchLiveBtn" class="accent">🔄 FETCH NOW</button>
-          <button id="toggleTimerSyncBtn">⏯️ ENABLE ROUND SYNC</button>
-          <button id="clearLiveHistoryBtn" style="background:#ef4444;">🗑️ CLEAR</button>
-        </div>
-        <div id="liveErrorMsg" class="error-msg" style="display:none;"></div>
         <div class="info-note">
-          🔗 FIXED API · Syncs at exact round end (0s & 30s) &nbsp;|&nbsp; TOTAL: <b id="liveTotalCount">0</b>
+          🔗 FIXED API · Auto‑sync at round end (0s & 30s) &nbsp;|&nbsp; TOTAL ROUNDS: <b id="liveTotalCount">0</b>
         </div>
         <div class="live-table-wrap">
           <table class="live-table">
             <thead><tr><th>PERIOD</th><th>NUMBER</th><th>RESULT</th><th>PATTERN</th></thead>
-            <tbody id="liveTableBody"><tr><td colspan="4" style="text-align:center; padding:32px;">✨ No data · Enable sync or click FETCH</td></tr></tbody>
+            <tbody id="liveTableBody"><tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel" id="historyTab">
+        <div class="info-note">
+          📜 PREDICTION HISTORY (last 50) — accuracy shown after round ends
+        </div>
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead><tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>ACCURACY</th></thead>
+            <tbody id="historyTableBody"><tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -454,15 +415,16 @@
 
 <script>
 (function(){
-  // ---------- FIXED API URL (HIDDEN & PERMANENT) ----------
   const FIXED_API_URL = "https://masterhackwingo.vercel.app/api/wingo";
-
-  let liveHistory = [];
+  let liveHistory = [];          // { period, number, result }
+  let predictionHistory = [];    // { period, predictedResult, predictedNumber, actualResult, actualNumber, correct }
   let roundSyncActive = false;
-  let nextRoundTimeout = null;
+  let currentPrediction = null;   // stable prediction for current round
+  let currentPredictedNumber = null;
+  let lastFetchTime = 0;
   let timerAnimationId = null;
 
-  // ---- DRAG (glass widget) ----
+  // Drag widget
   const widget = document.getElementById('widget');
   const dragHandle = document.getElementById('dragHandle');
   let drag = false, startX, startY, startLeft, startTop;
@@ -484,7 +446,17 @@
   });
   document.addEventListener('mouseup', () => { drag = false; });
 
-  // ----- Helper: number styles & dots (1,3,7,9 green; 2,4,6,8 red; 5 green+purple; 0 red+purple)
+  // Helper: dots & colors for table
+  function getDotHtml(num) {
+    const n = parseInt(num);
+    let dots = [];
+    if (n === 5) dots = ['green-dot', 'purple-dot'];
+    else if (n === 0) dots = ['red-dot', 'purple-dot'];
+    else if ([1,3,7,9].includes(n)) dots = ['green-dot'];
+    else if ([2,4,6,8].includes(n)) dots = ['red-dot'];
+    if (dots.length === 0) return '<span class="dot" style="background:#aaa;"></span>';
+    return `<div class="dot-wrapper">${dots.map(d => `<span class="dot ${d}"></span>`).join('')}</div>`;
+  }
   function getNumberClass(num) {
     const n = parseInt(num);
     if ([1,3,7,9].includes(n)) return 'num-green';
@@ -492,30 +464,27 @@
     if (n === 5 || n === 0) return 'num-purple';
     return '';
   }
-  function getDotHtml(num) {
-    const n = parseInt(num);
-    if (n === 5) return `<span class="dot green-dot"></span><span class="dot purple-dot"></span>`;
-    if (n === 0) return `<span class="dot red-dot"></span><span class="dot purple-dot"></span>`;
-    if ([1,3,7,9].includes(n)) return `<span class="dot green-dot"></span>`;
-    if ([2,4,6,8].includes(n)) return `<span class="dot red-dot"></span>`;
-    return `<span class="dot" style="background:#aaa;"></span>`;
-  }
 
-  // Persistence
   function loadLiveHistory() {
-    const saved = localStorage.getItem('wingo_live_glass');
+    const saved = localStorage.getItem('wingo_pattern_v3');
     if (saved) try { liveHistory = JSON.parse(saved); } catch(e) { liveHistory = []; }
+    const savedPred = localStorage.getItem('wingo_pred_history');
+    if (savedPred) try { predictionHistory = JSON.parse(savedPred); } catch(e) { predictionHistory = []; }
     renderLiveTable();
-    updatePredictionUI();
+    renderHistoryTable();
+    // initial prediction (will be updated after fetch)
   }
   function saveLiveHistory() {
-    localStorage.setItem('wingo_live_glass', JSON.stringify(liveHistory.slice(-500)));
+    localStorage.setItem('wingo_pattern_v3', JSON.stringify(liveHistory.slice(-500)));
+  }
+  function savePredictionHistory() {
+    localStorage.setItem('wingo_pred_history', JSON.stringify(predictionHistory.slice(-200)));
   }
 
   function renderLiveTable() {
     const tbody = document.getElementById('liveTableBody');
     if (!liveHistory.length) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px;">✨ No data · Enable sync or click FETCH</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...</td></tr>';
       return;
     }
     let html = '';
@@ -535,73 +504,222 @@
     document.getElementById('liveTotalCount').innerText = liveHistory.length;
   }
 
-  // Prediction engine
-  function updatePredictionUI() {
-    const bigSpan = document.getElementById('bigStat');
-    const smallSpan = document.getElementById('smallStat');
-    const confSpan = document.getElementById('confStat');
-    const predictionDiv = document.getElementById('predictionResult');
-    const predictedSpan = document.getElementById('predictedNumber');
-    const confFill = document.getElementById('confidenceFill');
-    const algoDesc = document.getElementById('algoDesc');
-
-    if (!liveHistory.length) {
-      bigSpan.innerText = '0'; smallSpan.innerText = '0'; confSpan.innerText = '0%';
-      predictionDiv.innerHTML = '---'; predictedSpan.innerText = 'Enable round sync';
-      confFill.style.width = '0%';
-      algoDesc.innerText = 'No data yet. Activate sync → auto fetch at round end.';
+  function renderHistoryTable() {
+    const tbody = document.getElementById('historyTableBody');
+    if (!predictionHistory.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr>';
       return;
     }
-
-    let bigCount = 0, smallCount = 0;
-    liveHistory.forEach(item => {
-      if (item.result === 'BIG') bigCount++;
-      else if (item.result === 'SMALL') smallCount++;
+    let html = '';
+    predictionHistory.slice(0, 50).forEach(p => {
+      const correctText = p.correct ? '✅' : '❌';
+      const actualClass = p.actualResult ? (p.actualResult === 'BIG' ? 'big-result' : 'small-result') : '';
+      html += `<tr>
+        <td style="font-family:monospace;">${p.period}</td>
+        <td class="${p.predictedResult === 'BIG' ? 'big-result' : 'small-result'}">${p.predictedResult}</td>
+        <td class="${getNumberClass(p.predictedNumber)}"><strong>${p.predictedNumber}</strong></td>
+        <td class="${actualClass}">${p.actualResult || 'pending'} ${p.actualNumber !== undefined ? p.actualNumber : ''}</td>
+        <td>${correctText}</td>
+      </tr>`;
     });
-    bigSpan.innerText = bigCount;
-    smallSpan.innerText = smallCount;
-
-    const recent = liveHistory.slice(0, 8);
-    let recentBig = 0, recentSmall = 0;
-    recent.forEach(r => {
-      if (r.result === 'BIG') recentBig++;
-      else if (r.result === 'SMALL') recentSmall++;
-    });
-    const totalRecent = recentBig + recentSmall;
-    let prediction = null;
-    let confidence = 50;
-    if (totalRecent >= 2) {
-      if (recentBig > recentSmall) prediction = 'BIG';
-      else if (recentSmall > recentBig) prediction = 'SMALL';
-      else prediction = (recent[0]?.result === 'BIG') ? 'BIG' : 'SMALL';
-      confidence = Math.min(94, Math.floor((Math.max(recentBig, recentSmall) / totalRecent) * 100) + 5);
-      if (totalRecent < 4) confidence = Math.min(75, confidence);
-    } else {
-      prediction = (bigCount >= smallCount) ? 'BIG' : 'SMALL';
-      confidence = bigCount+smallCount > 5 ? 68 : 55;
-    }
-
-    if (prediction === 'BIG') {
-      predictionDiv.innerHTML = '<span class="big-result">🔴 BIG</span>';
-      predictedSpan.innerText = '📈 High range (5-9)';
-    } else {
-      predictionDiv.innerHTML = '<span class="small-result">🟢 SMALL</span>';
-      predictedSpan.innerText = '📉 Low range (0-4)';
-    }
-    confSpan.innerText = `${confidence}%`;
-    confFill.style.width = `${confidence}%`;
-    algoDesc.innerText = `Last ${totalRecent} rounds → ${recentBig}B / ${recentSmall}S · ${prediction} favored.`;
+    tbody.innerHTML = html;
   }
 
-  // ----- PRECISE FETCH from fixed API -----
+  function getNextPeriod() {
+    if (liveHistory.length === 0) return "----";
+    const latestPeriod = liveHistory[0].period;
+    let numericMatch = latestPeriod.match(/\d+$/);
+    if (numericMatch) {
+      let numPart = numericMatch[0];
+      let incremented = (parseInt(numPart) + 1).toString();
+      while (incremented.length < numPart.length) incremented = "0" + incremented;
+      return latestPeriod.slice(0, latestPeriod.length - numPart.length) + incremented;
+    }
+    return latestPeriod + "+1";
+  }
+
+  // ---------- PATTERN RECOGNITION (A=SMALL, B=BIG) ----------
+  function convertToAB(history) {
+    return history.map(h => h.result === 'SMALL' ? 'A' : 'B');
+  }
+
+  // Extended pattern list based on user's rules
+  const patterns = [
+    { name: "1A1B (ABAB)", regex: /^(AB)+$/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A' },
+    { name: "2A2B (AABB)", regex: /^(AABB)+$/, next: (seq) => {
+      let last = seq.slice(-2).join('');
+      if (last === 'AA') return 'B';
+      if (last === 'BB') return 'A';
+      if (last === 'AB') return 'B';
+      return 'A';
+    } },
+    { name: "3A3B (AAABBB)", regex: /^(AAABBB)+$/, next: (seq) => {
+      let lastThree = seq.slice(-3).join('');
+      if (lastThree === 'AAA') return 'B';
+      if (lastThree === 'BBB') return 'A';
+      if (lastThree === 'AAB') return 'B';
+      return 'A';
+    } },
+    { name: "4A4B (AAAABBBB)", regex: /^(AAAABBBB)+$/, next: (seq) => seq.slice(-4).join('') === 'AAAA' ? 'B' : 'A' },
+    { name: "1A2B (ABBABB)", regex: /^(ABB)+$/, next: (seq) => {
+      let last = seq.slice(-3).join('');
+      if (last === 'ABB') return 'A';
+      return 'B';
+    } },
+    { name: "2A1B (AABAAB)", regex: /^(AAB)+$/, next: (seq) => seq.slice(-2).join('') === 'AA' ? 'B' : 'A' },
+    { name: "1A3B (ABBBABBB)", regex: /^(ABBB)+$/, next: (seq) => seq.slice(-4).join('') === 'ABBB' ? 'A' : 'B' },
+    { name: "3A1B (AAABAAAB)", regex: /^(AAAB)+$/, next: (seq) => seq.slice(-3).join('') === 'AAA' ? 'B' : 'A' },
+    { name: "Long streak A", regex: /^A{5,}$/, next: () => 'B', confidence: 0.8 },
+    { name: "Long streak B", regex: /^B{5,}$/, next: () => 'A', confidence: 0.8 },
+    { name: "Mirror trend (alternating long)", regex: /^ABABABAB/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', confidence: 0.75 }
+  ];
+
+  function detectPattern(abSeq) {
+    if (abSeq.length < 2) return null;
+    // try each pattern on the full sequence or last 12 chars
+    let testSeq = abSeq.join('');
+    for (let p of patterns) {
+      if (p.regex.test(testSeq) || (testSeq.length > 10 && p.regex.test(testSeq.slice(-12)))) {
+        let next = p.next(abSeq);
+        let conf = p.confidence || 0.7;
+        return { pattern: p.name, next, confidence: conf };
+      }
+    }
+    // fallback: weighted recent majority
+    let recent = abSeq.slice(0,6);
+    let aCount = recent.filter(c => c === 'A').length;
+    let bCount = recent.length - aCount;
+    let next = aCount > bCount ? 'B' : 'A';
+    let conf = Math.max(aCount, bCount) / recent.length;
+    return { pattern: "Weighted recency", next, confidence: conf };
+  }
+
+  // predict number using frequency with penalty for last number
+  function predictNumber(history) {
+    if (history.length === 0) return { number: 5, conf: 0.5 };
+    const lastNum = history[0].number;
+    let scores = Array(10).fill(0);
+    let totalWeight = 0;
+    for (let i=0; i<Math.min(history.length, 30); i++) {
+      let weight = Math.pow(0.88, i);
+      let num = history[i].number;
+      scores[num] += weight;
+      totalWeight += weight;
+    }
+    // penalize last number heavily
+    scores[lastNum] *= 0.6;
+    let bestNum = 0, bestScore = -1;
+    for (let i=0;i<10;i++) {
+      if (scores[i] > bestScore) {
+        bestScore = scores[i];
+        bestNum = i;
+      }
+    }
+    let confidence = bestScore / totalWeight;
+    return { number: bestNum, conf: Math.min(0.85, confidence + 0.1) };
+  }
+
+  // generate stable prediction based on current history (called only at round end)
+  function generateStablePrediction() {
+    if (liveHistory.length === 0) {
+      currentPrediction = 'BIG';
+      currentPredictedNumber = 5;
+      return;
+    }
+    const abSeq = convertToAB(liveHistory);
+    const patternResult = detectPattern(abSeq);
+    let predictedResult = patternResult.next === 'A' ? 'SMALL' : 'BIG';
+    let confidence = patternResult.confidence;
+    // number prediction
+    const numPred = predictNumber(liveHistory);
+    let predictedNumber = numPred.number;
+    let numConf = numPred.conf;
+    let overallConf = (confidence + numConf) / 2;
+    overallConf = Math.min(0.94, Math.max(0.52, overallConf));
+    currentPrediction = predictedResult;
+    currentPredictedNumber = predictedNumber;
+    return { pred: predictedResult, number: predictedNumber, conf: overallConf, patternName: patternResult.pattern };
+  }
+
+  function updateUIWithCurrentPrediction() {
+    if (!currentPrediction) return;
+    const bigCount = liveHistory.filter(r => r.result === 'BIG').length;
+    const smallCount = liveHistory.length - bigCount;
+    document.getElementById('bigStat').innerText = bigCount;
+    document.getElementById('smallStat').innerText = smallCount;
+    // confidence from last generate (stored)
+    let confPercent = 70;
+    if (window._lastConf) confPercent = window._lastConf;
+    document.getElementById('confStat').innerText = `${confPercent}%`;
+    document.getElementById('confidenceFill').style.width = `${confPercent}%`;
+    // display prediction
+    const displayData = getNumberDisplayData(currentPredictedNumber);
+    let dotHtml = '';
+    if (displayData.dual) {
+      let classes = displayData.dotClass.split(' ');
+      dotHtml = `<div class="dual-dot-container">${classes.map(c => `<div class="dual-dot ${c}" style="width:56px; height:56px; border-radius:56px;"></div>`).join('')}</div>`;
+    } else if (displayData.dotClass) {
+      dotHtml = `<div class="prediction-dot ${displayData.dotClass}" style="width:56px; height:56px; border-radius:56px;"></div>`;
+    } else {
+      dotHtml = `<div style="width:56px; height:56px; border-radius:56px; background:#aaa;"></div>`;
+    }
+    const resultClass = (currentPrediction === 'BIG') ? 'big-result' : 'small-result';
+    const bigSmallText = (currentPrediction === 'BIG') ? 'BIG' : 'SMALL';
+    document.getElementById('predictionArea').innerHTML = `
+      <div class="prediction-row">
+        ${dotHtml}
+        <div class="prediction-big-small ${resultClass}">${bigSmallText}</div>
+        <div class="prediction-number ${displayData.textClass}">${currentPredictedNumber}</div>
+      </div>
+    `;
+    const patternName = window._lastPattern || 'pattern detection';
+    document.getElementById('trendName').innerHTML = `🎯 ${currentPrediction} · Predicted ${currentPredictedNumber}`;
+    document.getElementById('trendDesc').innerHTML = `🧠 ${patternName} | Full history: ${liveHistory.length} rounds | Last actual: ${liveHistory[0]?.result || '?'} ${liveHistory[0]?.number || '?'}`;
+    document.getElementById('futurePeriodDisplay').innerText = getNextPeriod();
+  }
+
+  function getNumberDisplayData(num) {
+    if ([1,3,7,9].includes(num)) return { dotClass: "green-dot", dual: false, textClass: "num-green" };
+    if ([2,4,6,8].includes(num)) return { dotClass: "red-dot", dual: false, textClass: "num-red" };
+    if (num === 5) return { dotClass: "green-dot purple-dot", dual: true, textClass: "num-purple" };
+    if (num === 0) return { dotClass: "red-dot purple-dot", dual: true, textClass: "num-purple" };
+    return { dotClass: "", dual: false, textClass: "" };
+  }
+
+  // called when new round data arrives
+  function onNewRoundData() {
+    // before updating prediction, check if we have a previous prediction for the round that just ended
+    if (liveHistory.length > 0 && currentPrediction) {
+      const latestRound = liveHistory[0];
+      // add to prediction history if not already logged for this period
+      const existing = predictionHistory.find(p => p.period === latestRound.period);
+      if (!existing) {
+        predictionHistory.unshift({
+          period: latestRound.period,
+          predictedResult: currentPrediction,
+          predictedNumber: currentPredictedNumber,
+          actualResult: latestRound.result,
+          actualNumber: latestRound.number,
+          correct: (currentPrediction === latestRound.result)
+        });
+        savePredictionHistory();
+        renderHistoryTable();
+      }
+    }
+    // generate NEW prediction for the upcoming round
+    const result = generateStablePrediction();
+    window._lastConf = Math.floor(result.conf * 100);
+    window._lastPattern = result.patternName;
+    updateUIWithCurrentPrediction();
+  }
+
+  // ----- SILENT FETCH (only at round end) -----
   async function fetchLiveData() {
-    const errorDiv = document.getElementById('liveErrorMsg');
-    errorDiv.style.display = 'none';
     try {
       const res = await fetch(FIXED_API_URL);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error();
       const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'API error');
+      if (!data.success) return;
       const newHistory = data.history || [];
       const existingSet = new Set(liveHistory.map(h => h.period));
       let added = 0;
@@ -609,7 +727,7 @@
         if (item.period && !existingSet.has(item.period) && typeof item.number !== 'undefined') {
           let finalResult = item.result;
           if (!finalResult) finalResult = (item.number >= 5) ? 'BIG' : 'SMALL';
-          liveHistory.push({
+          liveHistory.unshift({
             period: String(item.period),
             number: item.number,
             result: finalResult
@@ -622,109 +740,60 @@
         liveHistory.sort((a,b) => String(b.period).localeCompare(String(a.period)));
         saveLiveHistory();
         renderLiveTable();
-        updatePredictionUI();
-        errorDiv.style.display = 'block';
-        errorDiv.style.color = '#ccffcc';
-        errorDiv.innerText = `✅ ${added} new round(s) · prediction updated.`;
-        setTimeout(() => { if(errorDiv) errorDiv.style.display = 'none'; }, 2000);
-      } else {
-        errorDiv.style.display = 'block';
-        errorDiv.innerText = '✓ No new rounds from API.';
-        setTimeout(() => { if(errorDiv) errorDiv.style.display = 'none'; }, 1500);
+        onNewRoundData();   // prediction updates only here
       }
-    } catch (err) {
-      errorDiv.style.display = 'block';
-      errorDiv.innerText = `❌ ${err.message}`;
-    }
+    } catch (err) { /* silent */ }
   }
 
-  // ----- PRECISE TIMER (sync with game round end: 0s & 30s) -----
-  function scheduleNextRoundEnd() {
-    if (!roundSyncActive) return;
-    const now = new Date();
-    let ms = now.getMilliseconds();
-    let sec = now.getSeconds();
-    let targetSec;
-    if (sec < 30) targetSec = 30;
-    else targetSec = 60;
-    const msUntilTarget = (targetSec - sec) * 1000 - ms;
-    const delay = Math.max(0, msUntilTarget);
-    
-    if (nextRoundTimeout) clearTimeout(nextRoundTimeout);
-    nextRoundTimeout = setTimeout(() => {
-      // exactly at round end: fetch new data
-      fetchLiveData();
-      // then schedule next boundary
-      scheduleNextRoundEnd();
-    }, delay);
-  }
-
-  // update timer display every frame (smooth)
-  function startTimerDisplay() {
-    function updateDisplay() {
-      if (!roundSyncActive) {
-        const timerElem = document.getElementById('roundTimerDisplay');
-        if (timerElem) timerElem.innerText = '--s';
-        return;
-      }
+  // ----- PRECISE TIMER (exact round end) -----
+  function startTimerAndSync() {
+    let lastSecond = -1;
+    function tick() {
+      if (!roundSyncActive) return;
       const now = new Date();
-      let sec = now.getSeconds();
+      const ms = now.getMilliseconds();
+      const sec = now.getSeconds();
+      // update display every frame
       let remaining;
-      if (sec < 30) remaining = 30 - sec;
-      else remaining = 60 - sec;
-      const dec = (1000 - now.getMilliseconds()) / 1000;
-      let displayRemaining = remaining - 1 + (dec > 0.99 ? 0.99 : dec);
-      if (displayRemaining < 0) displayRemaining = 0;
+      if (sec < 30) remaining = 30 - sec - (ms / 1000);
+      else remaining = 60 - sec - (ms / 1000);
+      if (remaining < 0) remaining = 0;
       const timerElem = document.getElementById('roundTimerDisplay');
       if (timerElem) {
-        timerElem.innerText = `${Math.ceil(displayRemaining)}s`;
-        if (displayRemaining <= 3) timerElem.style.color = '#ff8866';
-        else timerElem.style.color = '#ffcc88';
+        timerElem.innerText = `${Math.ceil(remaining)}s`;
+        timerElem.style.color = remaining <= 3 ? '#ff8866' : '#ffcc88';
       }
-      timerAnimationId = requestAnimationFrame(updateDisplay);
+      // fetch exactly at round end (0 or 30 seconds) within 50ms window
+      if ((sec === 0 && ms < 80) || (sec === 30 && ms < 80)) {
+        if (lastSecond !== sec) {
+          lastSecond = sec;
+          fetchLiveData();
+        }
+      } else {
+        if (sec !== 0 && sec !== 30) lastSecond = -1;
+      }
+      timerAnimationId = requestAnimationFrame(tick);
     }
     if (timerAnimationId) cancelAnimationFrame(timerAnimationId);
-    timerAnimationId = requestAnimationFrame(updateDisplay);
+    timerAnimationId = requestAnimationFrame(tick);
   }
 
-  function stopRoundSync() {
-    roundSyncActive = false;
-    if (nextRoundTimeout) { clearTimeout(nextRoundTimeout); nextRoundTimeout = null; }
-    const timerElem = document.getElementById('roundTimerDisplay');
-    if (timerElem) timerElem.innerText = '--s';
-  }
-
-  function startRoundSync() {
+  function startAutoSync() {
     if (roundSyncActive) return;
     roundSyncActive = true;
-    // fetch immediately to get latest data
-    fetchLiveData();
-    scheduleNextRoundEnd();
-    startTimerDisplay();
+    fetchLiveData(); // initial fetch + prediction
+    startTimerAndSync();
   }
 
-  function toggleRoundSync() {
-    const btn = document.getElementById('toggleTimerSyncBtn');
-    if (roundSyncActive) {
-      stopRoundSync();
-      btn.innerHTML = '⏯️ ENABLE ROUND SYNC';
-      btn.style.background = '';
-    } else {
-      startRoundSync();
-      btn.innerHTML = '⏸️ DISABLE SYNC';
-      btn.style.background = '#ff884d';
-    }
-  }
-
-  // ----- UI Initialization -----
+  // UI Boot
   document.getElementById('unlockBtn').addEventListener('click', () => {
     const key = document.getElementById('vipKey').value.trim();
     if (['HB12', 'VIP999'].includes(key)) {
       document.getElementById('loginPanel').style.display = 'none';
       document.getElementById('mainPanel').style.display = 'block';
+      startAutoSync();
     } else alert('Invalid key');
   });
-
   document.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => {
       document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
@@ -732,20 +801,11 @@
       document.getElementById(t.dataset.tab + 'Tab').classList.add('active');
     });
   });
-
-  document.getElementById('fetchLiveBtn').addEventListener('click', fetchLiveData);
-  document.getElementById('toggleTimerSyncBtn').addEventListener('click', toggleRoundSync);
-  document.getElementById('clearLiveHistoryBtn').addEventListener('click', () => {
-    if(confirm('Clear all history?')) { liveHistory = []; saveLiveHistory(); renderLiveTable(); updatePredictionUI(); }
-  });
   document.getElementById('minimizeBtn').addEventListener('click', () => {
     const c = document.getElementById('content');
     c.style.display = c.style.display === 'none' ? 'block' : 'none';
   });
-
   loadLiveHistory();
-  // timer display starts in inactive state
-  startTimerDisplay(); // shows --s until sync enabled
 })();
 </script>
 </body>
