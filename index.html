@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>WINGO · OCR + LIVE SYNC</title>
   <style>
-    /* ... (All your existing CSS styles remain the same) ... */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { overflow: hidden; height: 100vh; width: 100vw; background: #0a0d16; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
     .game-iframe { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; opacity: 0.92; }
@@ -26,7 +25,7 @@
     .paste-zone { background: rgba(68,255,170,0.06); border: 1.5px dashed #44ffaa; border-radius: 24px; padding: 18px 12px; text-align: center; cursor: pointer; margin-bottom: 14px; }
     .extract-preview { background: #0c0f18; border-radius: 20px; padding: 8px; margin-top: 12px; max-height: 340px; overflow-y: auto; }
     .result-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    .result-table th { text-align: left; padding: 8px 4px; color: #ffaa66; border-bottom: 1px solid #2a2f44; }
+    .result-table th { text-align: left; padding: 8px 4px; color: #ffaa66; border-bottom: 1px solid #2a2f44; font-weight: 600; }
     .result-table td { padding: 6px 4px; border-bottom: 1px solid #1e2233; color: #e0e4f0; }
     .algo-card { background: #0c0f18; border-radius: 20px; padding: 12px; margin: 12px 0; border-left: 4px solid #ffaa44; }
     .prediction-area { text-align: center; background: #0c0f18; border-radius: 28px; padding: 16px; margin: 12px 0; }
@@ -79,7 +78,6 @@
         <button class="tab" data-tab="live">🔴 LIVE DATA</button>
       </div>
 
-      <!-- SCAN PANEL -->
       <div class="panel active" id="scanTab">
         <div class="paste-zone" id="pasteZone">
           <div style="font-size:24px;">📋</div>
@@ -89,7 +87,6 @@
         <div class="extract-preview" id="extractionPreview"></div>
       </div>
 
-      <!-- PREDICT PANEL -->
       <div class="panel" id="predictTab">
         <div class="algo-card">
           <div class="algo-name" id="algoName">---</div>
@@ -107,7 +104,6 @@
         </div>
       </div>
 
-      <!-- LIVE PANEL -->
       <div class="panel" id="liveTab">
         <div class="api-controls">
           <input type="text" id="proxyUrl" placeholder="https://your-vercel.app/api/wingo">
@@ -115,13 +111,10 @@
           <button id="toggleAutoLiveBtn">▶️ Auto (Sync)</button>
           <button id="clearLiveHistoryBtn" style="background:#ff4444; color:white;">Clear</button>
         </div>
-        
         <div id="liveErrorMsg" class="error-msg" style="display:none;"></div>
-
         <div class="info-note">
           🔄 Status: <span id="liveTimestamp">--</span> | Total: <span id="liveTotalCount">0</span>
         </div>
-
         <div class="live-table-wrap">
           <table class="live-table">
             <thead>
@@ -132,7 +125,6 @@
             </tbody>
           </table>
         </div>
-        <div class="pagination" id="livePagination"></div>
       </div>
     </div>
   </div>
@@ -140,7 +132,7 @@
 
 <script>
 (function(){
-  // --- OCR & DRAG LOGIC (SAME AS BEFORE) ---
+  // --- OCR & DRAG LOGIC (SIMPLIFIED FOR PREVIEW) ---
   let gameHistory = [];
   const widget = document.getElementById('widget');
   const handle = document.getElementById('dragHandle');
@@ -155,7 +147,7 @@
   document.addEventListener('mousemove', e => { if (drag) { widget.style.left = (lx+(e.clientX-sx))+'px'; widget.style.top = (ly+(e.clientY-sy))+'px'; widget.style.right='auto'; } });
   document.addEventListener('mouseup', () => drag=false);
 
-  // --- LIVE DATA LOGIC (OPTIMIZED) ---
+  // --- LIVE DATA LOGIC ---
   let liveHistory = [];
   let liveAutoInterval = null;
 
@@ -164,7 +156,6 @@
     if (saved) try { liveHistory = JSON.parse(saved); } catch(e) { liveHistory = []; }
     renderLiveTable();
   }
-
   function saveLiveHistory() {
     localStorage.setItem('wingo_live_history', JSON.stringify(liveHistory.slice(-500)));
   }
@@ -172,7 +163,7 @@
   async function fetchLiveData() {
     const proxyUrl = document.getElementById('proxyUrl').value.trim();
     const errorDiv = document.getElementById('liveErrorMsg');
-    if (!proxyUrl) { errorDiv.style.display='block'; errorDiv.innerText='❌ Set Vercel URL first.'; return; }
+    if (!proxyUrl) return;
     
     errorDiv.style.display = 'none';
     try {
@@ -196,15 +187,12 @@
         liveHistory.sort((a,b) => b.period.localeCompare(a.period));
         saveLiveHistory();
         renderLiveTable();
-        // Also update the prediction if it's the main history source
-        if(gameHistory.length === 0) refreshPredictionWithLive();
       }
-      
       document.getElementById('liveTotalCount').innerText = liveHistory.length;
       document.getElementById('liveTimestamp').innerText = new Date().toLocaleTimeString();
     } catch (err) {
       errorDiv.style.display='block';
-      errorDiv.innerText = '❌ Error: ' + err.message;
+      errorDiv.innerText = '❌ ' + err.message;
     }
   }
 
@@ -220,7 +208,7 @@
       btn.style.background = '#ff3366';
       liveAutoInterval = setInterval(() => {
         const sec = new Date().getSeconds();
-        // FETCH AT :02 and :32 SECONDS
+        // TRIGGER FETCH AT :02 and :32 SECONDS
         if (sec === 2 || sec === 32) fetchLiveData();
         
         const next = sec < 30 ? (32 - sec) : (62 - sec);
@@ -232,7 +220,6 @@
   function renderLiveTable() {
     const tbody = document.getElementById('liveTableBody');
     if (!liveHistory.length) return;
-    
     let html = '';
     liveHistory.slice(0, 50).forEach(row => {
       const resCls = row.result === 'BIG' ? 'history-big' : 'history-small';
@@ -247,15 +234,7 @@
     tbody.innerHTML = html;
   }
 
-  // Helper to use Live Data for predictions
-  function refreshPredictionWithLive() {
-    if(!liveHistory.length) return;
-    // Map live format to prediction format
-    const historyForAlgo = [...liveHistory].sort((a,b) => a.period.localeCompare(b.period));
-    // (Call your existing predictNext function here)
-  }
-
-  // --- INIT ---
+  // UI INIT
   document.getElementById('unlockBtn').addEventListener('click', () => {
     const key = document.getElementById('vipKey').value.trim();
     if (['HB12', 'VIP999'].includes(key)) {
@@ -276,6 +255,10 @@
   document.getElementById('toggleAutoLiveBtn').addEventListener('click', toggleAutoRefresh);
   document.getElementById('clearLiveHistoryBtn').addEventListener('click', () => {
     if(confirm('Clear history?')) { liveHistory=[]; saveLiveHistory(); renderLiveTable(); }
+  });
+  document.getElementById('minimizeBtn').addEventListener('click', () => {
+    const c = document.getElementById('content');
+    c.style.display = c.style.display === 'none' ? 'block' : 'none';
   });
 
   loadLiveHistory();
