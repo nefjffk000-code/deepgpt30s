@@ -1,41 +1,47 @@
 // api/wingo.js
 export default async function handler(req, res) {
-  // 1. Target URL (The game's data source)
-  const gameUrl = "https://draw.ar-lottery01.com/WinGo/WinGo_30S.json?ts=" + Date.now();
-  
-  // 2. AllOrigins Proxy URL (Bypasses Cloudflare)
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(gameUrl)}`;
+  // 1. CORS Headers (Keep these to allow your widget to connect)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const response = await fetch(proxyUrl);
-    
+    const apiKey = '2f3e5638f4ace8154d1da9db0a2e00e5'; // Your ScraperAPI Key
+    const ts = Date.now();
+    const targetUrl = `https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?ts=${ts}`;
+
+    // 2. Wrap the targetUrl with ScraperAPI
+    const proxyUrl = `https://api.scraperapi.com/?api_key=${apiKey}&url=${encodeURIComponent(targetUrl)}`;
+
+    const response = await fetch(proxyUrl, {
+      method: 'GET'
+    });
+
     if (!response.ok) {
-      throw new Error(`Proxy status: ${response.status}`);
+      throw new Error(`ScraperAPI responded with status: ${response.status}`);
     }
 
-    const json = await response.json();
+    const data = await response.json();
+    
+    // 3. Process the data (Keep your existing mapping logic)
+    const list = data.data?.list || data.list || (Array.isArray(data) ? data : []);
 
-    if (json.contents) {
-      // Parse the string content into a real JSON object
-      const data = JSON.parse(json.contents);
-      
-      // Allow your frontend to read this data
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Content-Type', 'application/json');
-      
-      return res.status(200).json({
-        success: true,
-        data: data
-      });
-    } else {
-      return res.status(200).json({ success: false, error: "Empty content from proxy" });
-    }
+    const history = list.map(item => ({
+      period: String(item.issueNumber || item.IssueNumber || ''),
+      number: parseInt(item.number || item.Number || 0, 10),
+      result: (item.number || item.Number) >= 5 ? 'BIG' : 'SMALL'
+    })).filter(item => item.period);
+
+    // 4. Return the formatted history to your widget
+    return res.status(200).json({ success: true, history });
 
   } catch (error) {
-    console.error("Vercel Edge Error:", error.message);
+    console.error('Proxy Error:', error.message);
     return res.status(200).json({ 
       success: false, 
-      error: "Connection Failed: " + error.message 
+      error: "Connection Error: " + error.message 
     });
   }
 }
