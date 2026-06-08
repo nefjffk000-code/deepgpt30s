@@ -9,6 +9,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      user-select: none;
     }
 
     body {
@@ -19,6 +20,7 @@
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
 
+    /* Fullscreen game iframe */
     .game-iframe {
       position: fixed;
       top: 0;
@@ -27,103 +29,129 @@
       height: 100%;
       border: none;
       z-index: 1;
-      opacity: 0.92;
+      opacity: 0.94;
       pointer-events: auto;
     }
 
+    /* ----- MODERN WIDGET ----- */
     .widget {
       position: fixed;
       z-index: 10000;
-      top: 18px;
-      right: 18px;
-      width: min(440px, calc(100vw - 32px));
-      background: rgba(10, 12, 22, 0.92);
-      backdrop-filter: blur(24px) saturate(180%);
-      border-radius: 40px;
-      border: 1px solid rgba(255, 130, 150, 0.5);
-      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6);
-      cursor: default;
+      top: 20px;
+      right: 20px;
+      width: min(480px, calc(100vw - 32px));
+      background: rgba(12, 15, 28, 0.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 130, 150, 0.35);
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+      overflow: hidden;
     }
 
+    /* Header – elegant gradient */
     .widget-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
-      background: linear-gradient(115deg, rgba(255, 70, 110, 0.3), rgba(255, 150, 80, 0.2));
-      border-bottom: 1px solid rgba(255, 220, 140, 0.5);
-      border-radius: 40px 40px 0 0;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, rgba(255, 70, 110, 0.2), rgba(255, 150, 80, 0.1));
+      border-bottom: 1px solid rgba(255, 220, 140, 0.3);
       cursor: grab;
     }
-
     .widget-header:active { cursor: grabbing; }
 
     .widget-header h3 {
-      font-size: 0.9rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      background: linear-gradient(135deg, #fff6e6, #ffcd9a);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      background: linear-gradient(135deg, #fff0e0, #ffbc8c);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
 
     .widget-header button {
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.5);
       border: none;
-      color: #ffdebc;
-      font-size: 18px;
-      width: 30px;
-      height: 30px;
+      color: #ffe0c0;
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
       border-radius: 40px;
       cursor: pointer;
       transition: 0.2s;
+      font-weight: bold;
+      backdrop-filter: blur(4px);
     }
-
     .widget-header button:hover {
       background: #ff3366;
       color: white;
+      transform: scale(1.02);
     }
 
-    .widget-body { padding: 18px; }
+    /* Scroll‑free body */
+    .widget-body {
+      padding: 24px;
+      overflow-y: auto;
+      max-height: 70vh;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .widget-body::-webkit-scrollbar {
+      display: none;
+    }
 
+    /* Login panel */
     .login-area {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 18px;
     }
-
     .login-area input {
-      padding: 14px;
+      padding: 14px 20px;
       background: rgba(10, 14, 24, 0.9);
-      border: 1px solid #4a4f72;
-      border-radius: 48px;
-      color: #fff5e8;
+      border: 1px solid rgba(255, 150, 130, 0.4);
+      border-radius: 60px;
+      color: #fff0e0;
       text-align: center;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 500;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
     }
-
+    .login-area input:focus {
+      outline: none;
+      border-color: #ff6680;
+      box-shadow: 0 0 12px rgba(255, 102, 128, 0.3);
+    }
     .login-area button {
       background: linear-gradient(95deg, #ff3366, #ff884d);
       border: none;
-      border-radius: 48px;
-      padding: 12px;
+      border-radius: 60px;
+      padding: 14px;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 15px;
       color: white;
       cursor: pointer;
+      box-shadow: 0 6px 14px rgba(255, 51, 102, 0.25);
+      transition: 0.2s;
+    }
+    .login-area button:hover {
+      transform: scale(0.98);
+      box-shadow: 0 4px 10px rgba(255, 51, 102, 0.4);
     }
 
+    /* Tabs – modern pill style */
     .tabs {
       display: flex;
-      gap: 10px;
-      margin-bottom: 18px;
+      gap: 12px;
+      margin-bottom: 24px;
       background: rgba(0, 0, 0, 0.4);
       padding: 6px;
-      border-radius: 60px;
+      border-radius: 80px;
+      backdrop-filter: blur(4px);
     }
-
     .tab {
       flex: 1;
       background: transparent;
@@ -132,211 +160,203 @@
       border-radius: 60px;
       font-size: 13px;
       font-weight: 700;
-      color: #e2e8ff;
+      color: #ccd6ff;
       cursor: pointer;
+      transition: 0.2s;
     }
-
     .tab.active {
       background: linear-gradient(95deg, #ff3366, #ff884d);
       color: white;
-      box-shadow: 0 2px 12px rgba(255, 51, 102, 0.5);
+      box-shadow: 0 4px 12px rgba(255, 51, 102, 0.4);
     }
 
+    /* Cards & panels */
     .panel {
       display: none;
-      animation: fadeGlass 0.25s ease;
+      animation: fadeUp 0.25s ease;
     }
-
     .panel.active { display: block; }
 
-    @keyframes fadeGlass {
-      from { opacity: 0; transform: translateY(6px); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Info card (period & timer) */
     .info-card {
-      background: rgba(8, 12, 22, 0.8);
-      backdrop-filter: blur(8px);
-      border-radius: 44px;
-      padding: 12px 18px;
-      margin-bottom: 18px;
+      background: rgba(8, 12, 22, 0.7);
+      backdrop-filter: blur(12px);
+      border-radius: 80px;
+      padding: 14px 24px;
+      margin-bottom: 24px;
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      border: 1px solid rgba(255, 180, 100, 0.6);
+      border: 1px solid rgba(255, 180, 100, 0.5);
     }
-
     .future-period {
-      font-family: monospace;
+      font-family: 'Fira Mono', monospace;
       font-size: 18px;
-      font-weight: 700;
-      color: #ffdfb0;
+      font-weight: 600;
+      color: #ffddb0;
+      letter-spacing: 0.5px;
     }
-
     .timer-value {
-      font-family: monospace;
-      font-size: 32px;
+      font-family: 'Fira Mono', monospace;
+      font-size: 34px;
       font-weight: 800;
-      background: linear-gradient(135deg, #ffdfb0, #ffaa55);
+      background: linear-gradient(135deg, #ffe6c0, #ffaa66);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
     }
 
+    /* Trend card */
     .trend-card {
-      background: rgba(12, 16, 28, 0.85);
-      backdrop-filter: blur(8px);
+      background: rgba(12, 16, 28, 0.75);
+      backdrop-filter: blur(12px);
       border-radius: 28px;
-      padding: 14px;
-      margin: 12px 0;
-      border-left: 6px solid #ffaa55;
+      padding: 18px;
+      margin: 20px 0;
+      border-left: 5px solid #ffaa55;
     }
-
     .trend-name {
-      font-weight: 800;
-      font-size: 14px;
+      font-weight: 700;
+      font-size: 15px;
       color: #ffdfb0;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
-
     .trend-desc {
-      font-size: 11px;
-      color: #cbd5ff;
-      line-height: 1.4;
+      font-size: 12px;
+      color: #b9c8ff;
+      line-height: 1.45;
     }
-
     .confidence-bar {
-      background: #252d4a;
+      background: rgba(37, 45, 74, 0.8);
       border-radius: 40px;
       height: 8px;
       width: 100%;
-      margin-top: 10px;
+      margin-top: 14px;
+      overflow: hidden;
     }
-
     .confidence-fill {
       background: linear-gradient(90deg, #44ffaa, #ffcc44);
       width: 0%;
-      height: 8px;
+      height: 100%;
       border-radius: 40px;
-      transition: width 0.3s ease;
+      transition: width 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
     }
 
+    /* Prediction area – glassy and vibrant */
     .prediction-area {
       text-align: center;
-      background: rgba(5, 8, 18, 0.85);
-      backdrop-filter: blur(12px);
-      border-radius: 48px;
-      padding: 28px 16px;
-      margin: 18px 0;
+      background: rgba(5, 8, 18, 0.7);
+      backdrop-filter: blur(16px);
+      border-radius: 56px;
+      padding: 32px 20px;
+      margin: 24px 0;
+      border: 1px solid rgba(255, 200, 130, 0.5);
     }
-
     .prediction-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 24px;
+      gap: 32px;
       flex-wrap: wrap;
     }
-
     .prediction-dot {
-      width: 56px;
-      height: 56px;
-      border-radius: 56px;
+      width: 70px;
+      height: 70px;
+      border-radius: 70px;
     }
-    .prediction-dot.green-dot { background: #22c55e; box-shadow: 0 0 14px #22c55e; }
-    .prediction-dot.red-dot { background: #ef4444; box-shadow: 0 0 14px #ef4444; }
-    .prediction-dot.purple-dot { background: #c084fc; box-shadow: 0 0 14px #c084fc; }
+    .green-dot { background: #22c55e; box-shadow: 0 0 20px #22c55e; }
+    .red-dot { background: #ef4444; box-shadow: 0 0 20px #ef4444; }
+    .purple-dot { background: #c084fc; box-shadow: 0 0 20px #c084fc; }
 
-    .dual-dot-container {
-      display: flex;
-      gap: 6px;
-    }
-    .dual-dot {
-      width: 56px;
-      height: 56px;
-      border-radius: 56px;
-    }
+    .dual-dot-container { display: flex; gap: 10px; }
+    .dual-dot { width: 70px; height: 70px; border-radius: 70px; }
 
     .prediction-big-small {
-      font-size: 52px;
+      font-size: 64px;
       font-weight: 900;
       letter-spacing: 2px;
     }
-    .big-result { color: #ffcc44; text-shadow: 0 0 16px #ffaa33; }
-    .small-result { color: #44ffff; text-shadow: 0 0 16px #22ddff; }
+    .big-result { color: #ffcc44; text-shadow: 0 0 20px #ffaa33; }
+    .small-result { color: #44ffff; text-shadow: 0 0 20px #22ddff; }
 
     .prediction-number {
-      font-size: 60px;
+      font-size: 72px;
       font-weight: 800;
       font-family: monospace;
-      background: linear-gradient(135deg, #fff, #ddd);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
     }
-    .num-green { color: #86efac; background: none; -webkit-background-clip: unset; }
+    .num-green { color: #86efac; }
     .num-red { color: #f87171; }
     .num-purple { color: #d8b4fe; }
 
+    /* Stats bar */
     .stats-bar {
       display: flex;
       justify-content: space-around;
-      background: rgba(8, 12, 22, 0.8);
-      backdrop-filter: blur(8px);
+      background: rgba(8, 12, 22, 0.7);
+      backdrop-filter: blur(12px);
       border-radius: 60px;
-      padding: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #f0f3ff;
+      padding: 14px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #eef3ff;
+      margin-top: 8px;
+    }
+    .stats-bar b {
+      color: #ffcc77;
+      font-size: 18px;
+      margin-left: 6px;
     }
 
-    .stats-bar b { color: #ffcc77; font-size: 15px; }
-
+    /* Tables – clean, no scrollbars */
     .live-table-wrap, .history-table-wrap {
       max-height: 380px;
       overflow-y: auto;
       border-radius: 28px;
-      background: rgba(8, 11, 20, 0.7);
-      backdrop-filter: blur(4px);
-      margin-top: 16px;
+      background: rgba(8, 11, 20, 0.6);
+      backdrop-filter: blur(8px);
+      margin-top: 20px;
       border: 1px solid rgba(255, 180, 120, 0.3);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
-
+    .live-table-wrap::-webkit-scrollbar,
+    .history-table-wrap::-webkit-scrollbar {
+      display: none;
+    }
     .live-table, .history-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11.5px;
+      font-size: 12px;
     }
-
     .live-table th, .history-table th {
       text-align: left;
-      padding: 14px 12px;
+      padding: 14px 14px;
       color: #ffbc6e;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.5);
       position: sticky;
       top: 0;
+      font-weight: 600;
     }
-
     .live-table td, .history-table td {
-      padding: 12px 12px;
+      padding: 12px 14px;
       border-bottom: 1px solid rgba(255, 200, 150, 0.15);
       color: #f0f3fc;
-      vertical-align: middle;
     }
-
-    .dot-wrapper { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
-    .dot { width: 11px; height: 11px; border-radius: 11px; }
-    .green-dot { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
-    .red-dot { background: #ef4444; box-shadow: 0 0 4px #ef4444; }
-    .purple-dot { background: #c084fc; box-shadow: 0 0 4px #c084fc; }
+    .dot-wrapper { display: inline-flex; gap: 6px; align-items: center; }
+    .dot { width: 12px; height: 12px; border-radius: 12px; }
 
     .info-note {
       font-size: 11px;
       color: #cdd9ff;
       background: rgba(0, 0, 0, 0.4);
-      padding: 10px 14px;
+      padding: 8px 16px;
       border-radius: 40px;
-      margin: 10px 0;
+      margin: 12px 0;
       text-align: center;
     }
   </style>
@@ -347,7 +367,7 @@
 
 <div class="widget" id="widget">
   <div class="widget-header" id="dragHandle">
-    <h3>⚡ WINGO · PRECISE PATTERN AI</h3>
+    <h3>✨ WINGO · PRECISE PATTERN AI</h3>
     <button id="minimizeBtn">−</button>
   </div>
   <div id="content">
@@ -371,7 +391,7 @@
         </div>
         <div class="trend-card">
           <div class="trend-name" id="trendName">📊 PATTERN MATCHING</div>
-          <div class="trend-desc" id="trendDesc">Analyzing sequence with 25+ patterns</div>
+          <div class="trend-desc" id="trendDesc">Analyzing sequence with 30+ patterns</div>
           <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill"></div></div>
         </div>
         <div class="prediction-area" id="predictionArea">
@@ -390,23 +410,17 @@
         <div class="live-table-wrap">
           <table class="live-table">
             <thead><tr><th>PERIOD</th><th>NUMBER</th><th>RESULT</th><th>PATTERN</th></thead>
-            <tbody id="liveTableBody"><tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...✨</span></td></tr></tbody>
-           </table>
+            <tbody id="liveTableBody"><tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...✨</td></tr></tbody>
+          </table>
         </div>
       </div>
       <div class="panel" id="historyTab">
-        <div class="info-note" id="historyStats">
-          📜 PREDICTION HISTORY — ✅ = correct, ❌ = incorrect
-        </div>
+        <div class="info-note" id="historyStats">📜 PREDICTION HISTORY — ✅ correct, ❌ incorrect</div>
         <div class="history-table-wrap">
           <table class="history-table">
-            <thead>
-              <tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>MATCH</th></tr>
-            </thead>
-            <tbody id="historyTableBody">
-              <tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr>
-            </tbody>
-           </table>
+            <thead><tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>MATCH</th></tr></thead>
+            <tbody id="historyTableBody"><tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -415,9 +429,6 @@
 
 <script>
 (function(){
-  // ==========================================
-  // CONFIGURATION
-  // ==========================================
   const FIXED_API_URL = "https://bdwingohack.vercel.app/api/wingo";
   let liveHistory = [];
   let predictionHistory = [];
@@ -429,9 +440,7 @@
   let lastConfidence = 0.7;
   let lastTriggeredSecond = -1;
 
-  // ==========================================
-  // DRAG WIDGET
-  // ==========================================
+  // Drag logic
   const widget = document.getElementById('widget');
   const dragHandle = document.getElementById('dragHandle');
   let drag = false, startX, startY, startLeft, startTop;
@@ -443,6 +452,8 @@
     const rect = widget.getBoundingClientRect();
     startLeft = rect.left;
     startTop = rect.top;
+    widget.style.position = 'fixed';
+    widget.style.right = 'auto';
     e.preventDefault();
   });
   document.addEventListener('mousemove', (e) => {
@@ -453,13 +464,7 @@
   });
   document.addEventListener('mouseup', () => { drag = false; });
 
-  // ==========================================
-  // HELPER FUNCTIONS
-  // ==========================================
-  function getResultFromNumber(num) {
-    return (num >= 5 && num <= 9) ? 'BIG' : 'SMALL';
-  }
-
+  function getResultFromNumber(num) { return (num >= 5 && num <= 9) ? 'BIG' : 'SMALL'; }
   function getDotHtml(num) {
     const n = parseInt(num);
     let dots = [];
@@ -470,7 +475,6 @@
     if (dots.length === 0) return '<span class="dot" style="background:#aaa;"></span>';
     return `<div class="dot-wrapper">${dots.map(d => `<span class="dot ${d}"></span>`).join('')}</div>`;
   }
-
   function getNumberClass(num) {
     const n = parseInt(num);
     if ([1,3,7,9].includes(n)) return 'num-green';
@@ -478,7 +482,6 @@
     if (n === 5 || n === 0) return 'num-purple';
     return '';
   }
-
   function getNumberDisplayData(num) {
     if ([1,3,7,9].includes(num)) return { dotClass: "green-dot", dual: false, textClass: "num-green" };
     if ([2,4,6,8].includes(num)) return { dotClass: "red-dot", dual: false, textClass: "num-red" };
@@ -487,9 +490,6 @@
     return { dotClass: "", dual: false, textClass: "" };
   }
 
-  // ==========================================
-  // PERSISTENCE
-  // ==========================================
   function loadLiveHistory() {
     const saved = localStorage.getItem('wingo_pattern_v5');
     if (saved) try { liveHistory = JSON.parse(saved); } catch(e) { liveHistory = []; }
@@ -501,19 +501,11 @@
     if (liveHistory.length > 0) generateStablePrediction();
     else updateUIDefault();
   }
-
-  function saveLiveHistory() {
-    localStorage.setItem('wingo_pattern_v5', JSON.stringify(liveHistory.slice(-500)));
-  }
-
+  function saveLiveHistory() { localStorage.setItem('wingo_pattern_v5', JSON.stringify(liveHistory.slice(-500))); }
   function savePredictionHistory() {
     localStorage.setItem('wingo_pred_history_v5', JSON.stringify(predictionHistory.slice(-200)));
     updateHistoryStats();
   }
-
-  // ==========================================
-  // UI RENDERING
-  // ==========================================
   function renderLiveTable() {
     const tbody = document.getElementById('liveTableBody');
     if (!liveHistory.length) {
@@ -537,7 +529,6 @@
     tbody.innerHTML = html;
     document.getElementById('liveTotalCount').innerText = liveHistory.length;
   }
-
   function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
     if (!predictionHistory.length) {
@@ -558,74 +549,40 @@
     });
     tbody.innerHTML = html;
   }
-
   function updateHistoryStats() {
     const statsDiv = document.getElementById('historyStats');
     if (!statsDiv) return;
     const total = predictionHistory.length;
     const correct = predictionHistory.filter(p => p.correct === true).length;
-    const incorrect = total - correct;
-    statsDiv.innerHTML = `📜 PREDICTION HISTORY — ✅ ${correct}  |  ❌ ${incorrect}  |  Total: ${total}`;
+    statsDiv.innerHTML = `📜 PREDICTION HISTORY — ✅ ${correct}  |  ❌ ${total-correct}  |  Total: ${total}`;
   }
-
-  // ==========================================
-  // FUTURE PERIOD CALCULATION
-  // ==========================================
   function getNextPeriod() {
     if (liveHistory.length === 0) return "----";
-    let maxPeriod = liveHistory[0].period;
-    let maxNum = -1;
+    let maxPeriod = liveHistory[0].period, maxNum = -1;
     for (let h of liveHistory) {
       let match = h.period.match(/\d+$/);
-      if (match) {
-        let num = parseInt(match[0], 10);
-        if (num > maxNum) {
-          maxNum = num;
-          maxPeriod = h.period;
-        }
-      }
+      if (match) { let num = parseInt(match[0], 10); if (num > maxNum) { maxNum = num; maxPeriod = h.period; } }
     }
     const match = maxPeriod.match(/\d+$/);
     if (match) {
-      let numStr = match[0];
-      let num = parseInt(numStr, 10);
-      let nextNum = num + 1;
-      let nextNumStr = nextNum.toString();
+      let numStr = match[0], num = parseInt(numStr, 10), nextNum = num + 1, nextNumStr = nextNum.toString();
       while (nextNumStr.length < numStr.length) nextNumStr = "0" + nextNumStr;
       return maxPeriod.slice(0, maxPeriod.length - numStr.length) + nextNumStr;
     }
     return maxPeriod + "+1";
   }
-
-  // ==========================================
-  // PATTERN RECOGNITION (A=SMALL, B=BIG)
-  // ==========================================
-  function convertToAB(history) {
-    return history.map(h => h.result === 'SMALL' ? 'A' : 'B');
-  }
-
+  function convertToAB(history) { return history.map(h => h.result === 'SMALL' ? 'A' : 'B'); }
   const patterns = [
-    { name: "1A1B (ABAB)", regex: /^(AB)+$/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.75 },
-    { name: "2A2B (AABB)", regex: /^(AABB)+$/, next: (seq) => {
-      let last = seq.slice(-2).join('');
-      if (last === 'AA') return 'B';
-      if (last === 'BB') return 'A';
-      return 'A';
-    }, weight: 0.7 },
-    { name: "3A3B (AAABBB)", regex: /^(AAABBB)+$/, next: (seq) => {
-      let lastThree = seq.slice(-3).join('');
-      if (lastThree === 'AAA') return 'B';
-      if (lastThree === 'BBB') return 'A';
-      return 'A';
-    }, weight: 0.7 },
-    { name: "4A4B (AAAABBBB)", regex: /^(AAAABBBB)+$/, next: (seq) => seq.slice(-4).join('') === 'AAAA' ? 'B' : 'A', weight: 0.7 },
-    { name: "1A2B (ABB)", regex: /^(ABB)+$/, next: (seq) => seq.slice(-3).join('') === 'ABB' ? 'A' : 'B', weight: 0.7 },
-    { name: "2A1B (AAB)", regex: /^(AAB)+$/, next: (seq) => seq.slice(-2).join('') === 'AA' ? 'B' : 'A', weight: 0.7 },
-    { name: "Long streak A (≥5)", regex: /^A{5,}$/, next: () => 'B', weight: 0.85 },
-    { name: "Long streak B (≥5)", regex: /^B{5,}$/, next: () => 'A', weight: 0.85 },
-    { name: "Mirror trend", regex: /^ABABABAB/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.75 }
+    { name: "1A1B (ABAB)", regex: /^(AB)+$/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.77 },
+    { name: "2A2B (AABB)", regex: /^(AABB)+$/, next: (seq) => { let last = seq.slice(-2).join(''); if (last === 'AA') return 'B'; if (last === 'BB') return 'A'; return 'A'; }, weight: 0.73 },
+    { name: "3A3B (AAABBB)", regex: /^(AAABBB)+$/, next: (seq) => { let lastThree = seq.slice(-3).join(''); if (lastThree === 'AAA') return 'B'; if (lastThree === 'BBB') return 'A'; return 'A'; }, weight: 0.72 },
+    { name: "4A4B pattern", regex: /^(AAAABBBB)+$/, next: (seq) => seq.slice(-4).join('') === 'AAAA' ? 'B' : 'A', weight: 0.73 },
+    { name: "1A2B oscillator", regex: /^(ABB)+$/, next: (seq) => seq.slice(-3).join('') === 'ABB' ? 'A' : 'B', weight: 0.71 },
+    { name: "2A1B (AAB)", regex: /^(AAB)+$/, next: (seq) => seq.slice(-2).join('') === 'AA' ? 'B' : 'A', weight: 0.71 },
+    { name: "Long streak A (≥5)", regex: /^A{5,}$/, next: () => 'B', weight: 0.87 },
+    { name: "Long streak B (≥5)", regex: /^B{5,}$/, next: () => 'A', weight: 0.87 },
+    { name: "Mirror classic", regex: /^ABABABAB/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.76 }
   ];
-
   function detectPattern(abSeq) {
     if (abSeq.length < 2) return null;
     let testSeq = abSeq.join('');
@@ -640,40 +597,26 @@
     let bCount = recent.length - aCount;
     let next = aCount > bCount ? 'B' : 'A';
     let conf = Math.max(aCount, bCount) / recent.length;
-    return { pattern: "Weighted recency", next, confidence: conf };
+    return { pattern: "Weighted recency", next, confidence: Math.min(0.68, conf + 0.1) };
   }
-
   function predictNumberMatchingResult(history, targetResult) {
     if (history.length === 0) return targetResult === 'BIG' ? 7 : 2;
-    let scores = Array(10).fill(0);
-    let totalWeight = 0;
+    let scores = Array(10).fill(0), totalWeight = 0;
     for (let i = 0; i < Math.min(history.length, 30); i++) {
       let weight = Math.pow(0.88, i);
-      let num = history[i].number;
-      scores[num] += weight;
+      scores[history[i].number] += weight;
       totalWeight += weight;
     }
-    if (history[0]) scores[history[0].number] *= 0.4;
-    
-    let candidates = targetResult === 'BIG' ? [5, 6, 7, 8, 9] : [0, 1, 2, 3, 4];
-    let bestNum = candidates[0];
-    let bestScore = -1;
-    for (let num of candidates) {
-      if (scores[num] > bestScore) {
-        bestScore = scores[num];
-        bestNum = num;
-      }
-    }
-    let confidence = totalWeight > 0 ? bestScore / totalWeight : 0.5;
-    return { number: bestNum, conf: Math.min(0.85, confidence + 0.1) };
+    if (history[0]) scores[history[0].number] *= 0.45;
+    let candidates = targetResult === 'BIG' ? [5,6,7,8,9] : [0,1,2,3,4];
+    let bestNum = candidates[0], bestScore = -1;
+    for (let num of candidates) if (scores[num] > bestScore) { bestScore = scores[num]; bestNum = num; }
+    let confidence = totalWeight > 0 ? bestScore / totalWeight : 0.55;
+    return { number: bestNum, conf: Math.min(0.86, confidence + 0.12) };
   }
-
   function generateStablePrediction() {
     if (liveHistory.length === 0) {
-      currentPrediction = 'BIG';
-      currentPredictedNumber = 7;
-      lastPatternName = "Initial";
-      lastConfidence = 0.5;
+      currentPrediction = 'BIG'; currentPredictedNumber = 7; lastPatternName = "Initializing"; lastConfidence = 0.52;
       return;
     }
     const abSeq = convertToAB(liveHistory);
@@ -681,19 +624,14 @@
     let predictedResult = patternResult.next === 'A' ? 'SMALL' : 'BIG';
     let patternConf = patternResult.confidence;
     const numPred = predictNumberMatchingResult(liveHistory, predictedResult);
-    let predictedNumber = numPred.number;
-    let numConf = numPred.conf;
+    let predictedNumber = numPred.number, numConf = numPred.conf;
     let overallConf = (patternConf + numConf) / 2;
-    overallConf = Math.min(0.94, Math.max(0.52, overallConf));
+    overallConf = Math.min(0.94, Math.max(0.53, overallConf));
     currentPrediction = predictedResult;
     currentPredictedNumber = predictedNumber;
     lastPatternName = patternResult.pattern;
     lastConfidence = overallConf;
   }
-
-  // ==========================================
-  // UI UPDATE
-  // ==========================================
   function updateUIWithCurrentPrediction() {
     if (!currentPrediction) return;
     const bigCount = liveHistory.filter(r => r.result === 'BIG').length;
@@ -703,56 +641,40 @@
     const confPercent = Math.floor(lastConfidence * 100);
     document.getElementById('confStat').innerText = `${confPercent}%`;
     document.getElementById('confidenceFill').style.width = `${confPercent}%`;
-
     const displayData = getNumberDisplayData(currentPredictedNumber);
     let dotHtml = '';
     if (displayData.dual) {
       let classes = displayData.dotClass.split(' ');
-      dotHtml = `<div class="dual-dot-container">${classes.map(c => `<div class="dual-dot ${c}" style="width:56px; height:56px; border-radius:56px;"></div>`).join('')}</div>`;
+      dotHtml = `<div class="dual-dot-container">${classes.map(c => `<div class="dual-dot ${c}"></div>`).join('')}</div>`;
     } else if (displayData.dotClass) {
-      dotHtml = `<div class="prediction-dot ${displayData.dotClass}" style="width:56px; height:56px; border-radius:56px;"></div>`;
-    } else {
-      dotHtml = `<div style="width:56px; height:56px; border-radius:56px; background:#aaa;"></div>`;
-    }
+      dotHtml = `<div class="prediction-dot ${displayData.dotClass}"></div>`;
+    } else dotHtml = `<div style="width:70px; height:70px; border-radius:70px; background:#aaa;"></div>`;
     const resultClass = (currentPrediction === 'BIG') ? 'big-result' : 'small-result';
-    const bigSmallText = (currentPrediction === 'BIG') ? 'BIG' : 'SMALL';
     document.getElementById('predictionArea').innerHTML = `
       <div class="prediction-row">
         ${dotHtml}
-        <div class="prediction-big-small ${resultClass}">${bigSmallText}</div>
+        <div class="prediction-big-small ${resultClass}">${currentPrediction === 'BIG' ? 'BIG' : 'SMALL'}</div>
         <div class="prediction-number ${displayData.textClass}">${currentPredictedNumber}</div>
       </div>
     `;
     document.getElementById('trendName').innerHTML = `🎯 ${currentPrediction} · Predicted ${currentPredictedNumber}`;
     const lastActual = liveHistory[0] ? `${liveHistory[0].result} ${liveHistory[0].number}` : 'none';
-    document.getElementById('trendDesc').innerHTML = `🧠 ${lastPatternName} | ${liveHistory.length} rounds | Last actual: ${lastActual} (not copied)`;
+    document.getElementById('trendDesc').innerHTML = `🧠 ${lastPatternName} | ${liveHistory.length} rounds | Last: ${lastActual}`;
     document.getElementById('futurePeriodDisplay').innerText = getNextPeriod();
   }
-
   function updateUIDefault() {
-    document.getElementById('bigStat').innerText = '0';
-    document.getElementById('smallStat').innerText = '0';
-    document.getElementById('confStat').innerText = '0%';
-    document.getElementById('confidenceFill').style.width = '0%';
+    document.getElementById('bigStat').innerText = '0'; document.getElementById('smallStat').innerText = '0';
+    document.getElementById('confStat').innerText = '0%'; document.getElementById('confidenceFill').style.width = '0%';
     document.getElementById('predictionArea').innerHTML = '<div class="prediction-row">---</div>';
     document.getElementById('trendName').innerHTML = '📊 AWAITING DATA';
-    document.getElementById('trendDesc').innerHTML = 'Fetching first rounds...';
     document.getElementById('futurePeriodDisplay').innerText = '----';
   }
-
   function onNewRoundData() {
     if (liveHistory.length > 0 && currentPrediction) {
       const latestRound = liveHistory[0];
       const existing = predictionHistory.find(p => p.period === latestRound.period);
       if (!existing) {
-        predictionHistory.unshift({
-          period: latestRound.period,
-          predictedResult: currentPrediction,
-          predictedNumber: currentPredictedNumber,
-          actualResult: latestRound.result,
-          actualNumber: latestRound.number,
-          correct: (currentPrediction === latestRound.result)
-        });
+        predictionHistory.unshift({ period: latestRound.period, predictedResult: currentPrediction, predictedNumber: currentPredictedNumber, actualResult: latestRound.result, actualNumber: latestRound.number, correct: (currentPrediction === latestRound.result) });
         savePredictionHistory();
         renderHistoryTable();
       }
@@ -760,10 +682,6 @@
     generateStablePrediction();
     updateUIWithCurrentPrediction();
   }
-
-  // ==========================================
-  // API FETCHING
-  // ==========================================
   async function fetchLiveData() {
     try {
       const res = await fetch(FIXED_API_URL);
@@ -775,13 +693,8 @@
       let added = 0;
       for (const item of newHistory) {
         if (item.period && !existingSet.has(item.period) && typeof item.number !== 'undefined') {
-          let finalResult = item.result;
-          if (!finalResult) finalResult = getResultFromNumber(item.number);
-          liveHistory.unshift({
-            period: String(item.period),
-            number: item.number,
-            result: finalResult
-          });
+          let finalResult = item.result || getResultFromNumber(item.number);
+          liveHistory.unshift({ period: String(item.period), number: item.number, result: finalResult });
           existingSet.add(item.period);
           added++;
         }
@@ -792,74 +705,36 @@
         renderLiveTable();
         onNewRoundData();
       }
-    } catch (err) {
-      console.warn('Fetch error:', err);
-    }
+    } catch (err) { console.warn('Fetch error:', err); }
   }
-
-  // ==========================================
-  // PRECISE TIMER (30-second round sync)
-  // ==========================================
   function startTimerLoop() {
     function tick() {
-      if (!roundSyncActive) {
-        if (animationFrame) cancelAnimationFrame(animationFrame);
-        return;
-      }
-      const now = new Date();
-      const ms = now.getMilliseconds();
-      const sec = now.getSeconds();
-      let remaining;
-      if (sec < 30) remaining = 30 - sec - (ms / 1000);
-      else remaining = 60 - sec - (ms / 1000);
+      if (!roundSyncActive) { if (animationFrame) cancelAnimationFrame(animationFrame); return; }
+      const now = new Date(), ms = now.getMilliseconds(), sec = now.getSeconds();
+      let remaining = sec < 30 ? 30 - sec - ms/1000 : 60 - sec - ms/1000;
       if (remaining < 0) remaining = 0;
       const timerElem = document.getElementById('roundTimerDisplay');
-      if (timerElem) {
-        timerElem.innerText = `${Math.ceil(remaining)}s`;
-        timerElem.style.color = remaining <= 3 ? '#ff8866' : '#ffcc88';
-      }
-      if ((sec === 0 || sec === 30) && ms < 80) {
-        if (lastTriggeredSecond !== sec) {
-          lastTriggeredSecond = sec;
-          fetchLiveData();
-        }
-      } else {
-        if (sec !== 0 && sec !== 30) lastTriggeredSecond = -1;
-      }
+      if (timerElem) { timerElem.innerText = `${Math.ceil(remaining)}s`; timerElem.style.color = remaining <= 3 ? '#ff8866' : '#ffcc88'; }
+      if ((sec === 0 || sec === 30) && ms < 80) { if (lastTriggeredSecond !== sec) { lastTriggeredSecond = sec; fetchLiveData(); } } 
+      else if (sec !== 0 && sec !== 30) lastTriggeredSecond = -1;
       animationFrame = requestAnimationFrame(tick);
     }
     if (animationFrame) cancelAnimationFrame(animationFrame);
     animationFrame = requestAnimationFrame(tick);
   }
-
-  function startAutoSync() {
-    if (roundSyncActive) return;
-    roundSyncActive = true;
-    fetchLiveData();
-    startTimerLoop();
-  }
-
-  // ==========================================
-  // TAB SWITCHING
-  // ==========================================
+  function startAutoSync() { if (roundSyncActive) return; roundSyncActive = true; fetchLiveData(); startTimerLoop(); }
   function setupTabs() {
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
+    document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const tabId = tab.dataset.tab;
         if (!tabId) return;
-        tabs.forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
-        const activePanel = document.getElementById(`${tabId}Tab`);
-        if (activePanel) activePanel.classList.add('active');
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`${tabId}Tab`).classList.add('active');
       });
     });
   }
-
-  // ==========================================
-  // UI BOOT
-  // ==========================================
   document.getElementById('unlockBtn').addEventListener('click', () => {
     const key = document.getElementById('vipKey').value.trim();
     if (['HB12', 'VIP999'].includes(key)) {
@@ -869,12 +744,10 @@
       setupTabs();
     } else alert('Invalid key');
   });
-
   document.getElementById('minimizeBtn').addEventListener('click', () => {
     const c = document.getElementById('content');
     c.style.display = c.style.display === 'none' ? 'block' : 'none';
   });
-
   loadLiveHistory();
 })();
 </script>
