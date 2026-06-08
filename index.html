@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>WINGO · PRECISE PATTERN AI + HISTORY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WINGO · REAL DATA PREDICTOR</title>
   <style>
     * {
       margin: 0;
@@ -11,455 +11,158 @@
       box-sizing: border-box;
     }
 
-    body {
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-      background: radial-gradient(circle at 20% 30%, #0a0c18, #03050a);
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    .game-iframe {
+    .wingo-widget {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      z-index: 1;
-      opacity: 0.92;
-      pointer-events: auto;
+      top: 20px;
+      right: 20px;
+      width: 400px;
+      background: rgba(10, 12, 22, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 100, 120, 0.5);
+      z-index: 100000;
+      font-family: 'Inter', system-ui, sans-serif;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      cursor: move;
     }
 
-    .widget {
-      position: fixed;
-      z-index: 10000;
-      top: 18px;
-      right: 18px;
-      width: min(440px, calc(100vw - 32px));
-      background: rgba(10, 12, 22, 0.92);
-      backdrop-filter: blur(24px) saturate(180%);
-      border-radius: 40px;
-      border: 1px solid rgba(255, 130, 150, 0.5);
-      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6);
-      cursor: default;
-    }
-
-    .widget-header {
+    .wingo-widget-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
-      background: linear-gradient(115deg, rgba(255, 70, 110, 0.3), rgba(255, 150, 80, 0.2));
-      border-bottom: 1px solid rgba(255, 220, 140, 0.5);
-      border-radius: 40px 40px 0 0;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #ff3366, #ff884d);
+      border-radius: 20px 20px 0 0;
+      color: white;
+      font-weight: bold;
       cursor: grab;
     }
 
-    .widget-header:active { cursor: grabbing; }
+    .wingo-widget-header:active { cursor: grabbing; }
 
-    .widget-header h3 {
-      font-size: 0.9rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      background: linear-gradient(135deg, #fff6e6, #ffcd9a);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .widget-header button {
-      background: rgba(0, 0, 0, 0.6);
+    .wingo-widget-controls button {
+      background: rgba(0, 0, 0, 0.3);
       border: none;
-      color: #ffdebc;
-      font-size: 18px;
-      width: 30px;
-      height: 30px;
-      border-radius: 40px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .widget-header button:hover {
-      background: #ff3366;
       color: white;
-    }
-
-    .widget-body { padding: 18px; }
-
-    .login-area {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .login-area input {
-      padding: 14px;
-      background: rgba(10, 14, 24, 0.9);
-      border: 1px solid #4a4f72;
-      border-radius: 48px;
-      color: #fff5e8;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .login-area button {
-      background: linear-gradient(95deg, #ff3366, #ff884d);
-      border: none;
-      border-radius: 48px;
-      padding: 12px;
-      font-weight: 700;
-      font-size: 14px;
-      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
       cursor: pointer;
+      margin-left: 6px;
     }
 
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 18px;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 6px;
-      border-radius: 60px;
-    }
+    .wingo-widget-body { padding: 16px; }
 
-    .tab {
-      flex: 1;
-      background: transparent;
-      border: none;
-      padding: 10px 0;
-      border-radius: 60px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #e2e8ff;
-      cursor: pointer;
-    }
-
-    .tab.active {
-      background: linear-gradient(95deg, #ff3366, #ff884d);
-      color: white;
-      box-shadow: 0 2px 12px rgba(255, 51, 102, 0.5);
-    }
-
-    .panel {
-      display: none;
-      animation: fadeGlass 0.25s ease;
-    }
-
-    .panel.active { display: block; }
-
-    @keyframes fadeGlass {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .info-card {
-      background: rgba(8, 12, 22, 0.8);
-      backdrop-filter: blur(8px);
-      border-radius: 44px;
-      padding: 12px 18px;
-      margin-bottom: 18px;
+    .wingo-timer-section {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      border: 1px solid rgba(255, 180, 100, 0.6);
     }
 
-    .future-period {
-      font-family: monospace;
-      font-size: 18px;
-      font-weight: 700;
-      color: #ffdfb0;
-    }
+    .wingo-label { font-size: 11px; color: #aaa; }
+    .wingo-period-value, .wingo-timer-value { font-size: 18px; font-weight: bold; color: #ffcc44; }
 
-    .timer-value {
-      font-family: monospace;
-      font-size: 32px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #ffdfb0, #ffaa55);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .trend-card {
-      background: rgba(12, 16, 28, 0.85);
-      backdrop-filter: blur(8px);
-      border-radius: 28px;
-      padding: 14px;
-      margin: 12px 0;
-      border-left: 6px solid #ffaa55;
-    }
-
-    .trend-name {
-      font-weight: 800;
-      font-size: 14px;
-      color: #ffdfb0;
-      margin-bottom: 6px;
-    }
-
-    .trend-desc {
-      font-size: 11px;
-      color: #cbd5ff;
-      line-height: 1.4;
-    }
-
-    .confidence-bar {
-      background: #252d4a;
-      border-radius: 40px;
-      height: 8px;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .confidence-fill {
-      background: linear-gradient(90deg, #44ffaa, #ffcc44);
-      width: 0%;
-      height: 8px;
-      border-radius: 40px;
-      transition: width 0.3s ease;
-    }
-
-    .prediction-area {
+    .wingo-prediction {
+      background: linear-gradient(135deg, #1a1f2e, #0f1220);
+      border-radius: 16px;
+      padding: 20px;
       text-align: center;
-      background: rgba(5, 8, 18, 0.85);
-      backdrop-filter: blur(12px);
-      border-radius: 48px;
-      padding: 28px 16px;
-      margin: 18px 0;
+      margin-bottom: 12px;
     }
 
-    .prediction-row {
+    .wingo-prediction-result { font-size: 36px; font-weight: bold; }
+    .wingo-prediction-number { font-size: 48px; font-weight: bold; font-family: monospace; margin-top: 8px; }
+
+    .wingo-stats {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      flex-wrap: wrap;
+      justify-content: space-around;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 12px;
     }
 
-    .prediction-dot {
-      width: 56px;
-      height: 56px;
-      border-radius: 56px;
-    }
-    .prediction-dot.green-dot { background: #22c55e; box-shadow: 0 0 14px #22c55e; }
-    .prediction-dot.red-dot { background: #ef4444; box-shadow: 0 0 14px #ef4444; }
-    .prediction-dot.purple-dot { background: #c084fc; box-shadow: 0 0 14px #c084fc; }
-
-    .dual-dot-container {
+    .wingo-tabs {
       display: flex;
-      gap: 6px;
-    }
-    .dual-dot {
-      width: 56px;
-      height: 56px;
-      border-radius: 56px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
-    .prediction-big-small {
-      font-size: 52px;
-      font-weight: 900;
-      letter-spacing: 2px;
+    .wingo-tab {
+      flex: 1;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
     }
-    .big-result { color: #ffcc44; text-shadow: 0 0 16px #ffaa33; }
-    .small-result { color: #44ffff; text-shadow: 0 0 16px #22ddff; }
 
-    .prediction-number {
-      font-size: 60px;
-      font-weight: 800;
-      font-family: monospace;
-      background: linear-gradient(135deg, #fff, #ddd);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+    .wingo-tab.active { background: #ff3366; }
+
+    .wingo-tab-content { display: none; }
+    .wingo-tab-content.active { display: block; }
+
+    .wingo-table-wrapper {
+      max-height: 300px;
+      overflow-y: auto;
     }
-    .num-green { color: #86efac; background: none; -webkit-background-clip: unset; }
+
+    .wingo-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .wingo-table th, .wingo-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+
+    .wingo-table th { background: #1a1f2e; color: #ffaa66; }
+
+    .history-big { color: #ffcc44; }
+    .history-small { color: #44ffff; }
+    .num-green { color: #4ade80; }
     .num-red { color: #f87171; }
     .num-purple { color: #d8b4fe; }
 
-    .stats-bar {
-      display: flex;
-      justify-content: space-around;
-      background: rgba(8, 12, 22, 0.8);
-      backdrop-filter: blur(8px);
-      border-radius: 60px;
-      padding: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #f0f3ff;
-    }
+    .dot-wrapper { display: inline-flex; gap: 3px; align-items: center; }
+    .dot { width: 10px; height: 10px; border-radius: 10px; }
+    .green-dot { background: #22c55e; }
+    .red-dot { background: #ef4444; }
+    .purple-dot { background: #c084fc; }
 
-    .stats-bar b { color: #ffcc77; font-size: 15px; }
-
-    .live-table-wrap, .history-table-wrap {
-      max-height: 380px;
-      overflow-y: auto;
-      border-radius: 28px;
-      background: rgba(8, 11, 20, 0.7);
-      backdrop-filter: blur(4px);
-      margin-top: 16px;
-      border: 1px solid rgba(255, 180, 120, 0.3);
-    }
-
-    .live-table, .history-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11.5px;
-    }
-
-    .live-table th, .history-table th {
-      text-align: left;
-      padding: 14px 12px;
-      color: #ffbc6e;
-      background: rgba(0, 0, 0, 0.3);
-      position: sticky;
-      top: 0;
-    }
-
-    .live-table td, .history-table td {
-      padding: 12px 12px;
-      border-bottom: 1px solid rgba(255, 200, 150, 0.15);
-      color: #f0f3fc;
-      vertical-align: middle;
-    }
-
-    .dot-wrapper { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
-    .dot { width: 11px; height: 11px; border-radius: 11px; }
-    .green-dot { background: #22c55e; box-shadow: 0 0 4px #22c55e; }
-    .red-dot { background: #ef4444; box-shadow: 0 0 4px #ef4444; }
-    .purple-dot { background: #c084fc; box-shadow: 0 0 4px #c084fc; }
-
-    .info-note {
-      font-size: 11px;
-      color: #cdd9ff;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 10px 14px;
-      border-radius: 40px;
-      margin: 10px 0;
-      text-align: center;
-    }
+    .big-result { color: #ffcc44; }
+    .small-result { color: #44ffff; }
   </style>
 </head>
 <body>
-
-<iframe class="game-iframe" src="https://hgnice.club/#/register?invitationCode=287821529002"></iframe>
-
-<div class="widget" id="widget">
-  <div class="widget-header" id="dragHandle">
-    <h3>⚡ WINGO · PRECISE PATTERN AI</h3>
-    <button id="minimizeBtn">−</button>
-  </div>
-  <div id="content">
-    <div class="widget-body" id="loginPanel">
-      <div class="login-area">
-        <input type="text" id="vipKey" placeholder="VIP KEY" autocomplete="off">
-        <button id="unlockBtn">🔓 UNLOCK</button>
-        <div style="font-size:11px; color:#b9c2f0; text-align:center;">Key: HB12 or VIP999</div>
-      </div>
-    </div>
-    <div class="widget-body" id="mainPanel" style="display:none;">
-      <div class="tabs">
-        <button class="tab active" data-tab="predict">🔮 PREDICT</button>
-        <button class="tab" data-tab="live">📡 LIVE DATA</button>
-        <button class="tab" data-tab="history">📜 HISTORY</button>
-      </div>
-      <div class="panel active" id="predictTab">
-        <div class="info-card">
-          <span class="future-period" id="futurePeriodDisplay">----</span>
-          <span class="timer-value" id="roundTimerDisplay">--s</span>
-        </div>
-        <div class="trend-card">
-          <div class="trend-name" id="trendName">📊 PATTERN MATCHING</div>
-          <div class="trend-desc" id="trendDesc">Analyzing sequence with 25+ patterns</div>
-          <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill"></div></div>
-        </div>
-        <div class="prediction-area" id="predictionArea">
-          <div class="prediction-row">---</div>
-        </div>
-        <div class="stats-bar">
-          <span>🔴 BIG: <b id="bigStat">0</b></span>
-          <span>🟢 SMALL: <b id="smallStat">0</b></span>
-          <span>📊 CONF: <b id="confStat">0%</b></span>
-        </div>
-      </div>
-      <div class="panel" id="liveTab">
-        <div class="info-note">
-          🔗 FIXED API · Auto‑sync at round end (0s & 30s) &nbsp;|&nbsp; TOTAL ROUNDS: <b id="liveTotalCount">0</b>
-        </div>
-        <div class="live-table-wrap">
-          <table class="live-table">
-            <thead><tr><th>PERIOD</th><th>NUMBER</th><th>RESULT</th><th>PATTERN</th></thead>
-            <tbody id="liveTableBody"><tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...✨</span></td></tr></tbody>
-           </table>
-        </div>
-      </div>
-      <div class="panel" id="historyTab">
-        <div class="info-note" id="historyStats">
-          📜 PREDICTION HISTORY — ✅ = correct, ❌ = incorrect
-        </div>
-        <div class="history-table-wrap">
-          <table class="history-table">
-            <thead>
-              <tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>MATCH</th></tr>
-            </thead>
-            <tbody id="historyTableBody">
-              <tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr>
-            </tbody>
-           </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="wingo-root"></div>
 
 <script>
-(function(){
+(function() {
   // ==========================================
-  // CONFIGURATION
+  // INJECT WIDGET INTO THE GAME PAGE
   // ==========================================
-  const FIXED_API_URL = "https://bdwingohack.vercel.app/api/wingo";
+  
   let liveHistory = [];
   let predictionHistory = [];
-  let roundSyncActive = false;
   let currentPrediction = null;
   let currentPredictedNumber = null;
-  let animationFrame = null;
-  let lastPatternName = "pattern detection";
+  let lastPatternName = "analyzing";
   let lastConfidence = 0.7;
-  let lastTriggeredSecond = -1;
+  let timerInterval = null;
+  let lastFetchSecond = -1;
+  let widgetElement = null;
+  let isDragging = false;
+  let dragStartX, dragStartY, widgetStartX, widgetStartY;
 
-  // ==========================================
-  // DRAG WIDGET
-  // ==========================================
-  const widget = document.getElementById('widget');
-  const dragHandle = document.getElementById('dragHandle');
-  let drag = false, startX, startY, startLeft, startTop;
-  dragHandle.addEventListener('mousedown', (e) => {
-    if (e.target.closest('button')) return;
-    drag = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    const rect = widget.getBoundingClientRect();
-    startLeft = rect.left;
-    startTop = rect.top;
-    e.preventDefault();
-  });
-  document.addEventListener('mousemove', (e) => {
-    if (!drag) return;
-    widget.style.left = `${startLeft + (e.clientX - startX)}px`;
-    widget.style.top = `${startTop + (e.clientY - startY)}px`;
-    widget.style.right = 'auto';
-  });
-  document.addEventListener('mouseup', () => { drag = false; });
-
-  // ==========================================
-  // HELPER FUNCTIONS
-  // ==========================================
-  function getResultFromNumber(num) {
-    return (num >= 5 && num <= 9) ? 'BIG' : 'SMALL';
-  }
-
+  // Helper functions
   function getDotHtml(num) {
     const n = parseInt(num);
     let dots = [];
@@ -487,90 +190,64 @@
     return { dotClass: "", dual: false, textClass: "" };
   }
 
-  // ==========================================
-  // PERSISTENCE
-  // ==========================================
-  function loadLiveHistory() {
-    const saved = localStorage.getItem('wingo_pattern_v5');
-    if (saved) try { liveHistory = JSON.parse(saved); } catch(e) { liveHistory = []; }
-    const savedPred = localStorage.getItem('wingo_pred_history_v5');
-    if (savedPred) try { predictionHistory = JSON.parse(savedPred); } catch(e) { predictionHistory = []; }
-    renderLiveTable();
-    renderHistoryTable();
-    updateHistoryStats();
-    if (liveHistory.length > 0) generateStablePrediction();
-    else updateUIDefault();
+  function saveToLocalStorage() {
+    localStorage.setItem('wingo_widget_history', JSON.stringify(liveHistory.slice(-300)));
+    localStorage.setItem('wingo_widget_predictions', JSON.stringify(predictionHistory.slice(-200)));
   }
 
-  function saveLiveHistory() {
-    localStorage.setItem('wingo_pattern_v5', JSON.stringify(liveHistory.slice(-500)));
+  function loadFromLocalStorage() {
+    const saved = localStorage.getItem('wingo_widget_history');
+    if (saved) try { liveHistory = JSON.parse(saved); } catch(e) {}
+    const savedPred = localStorage.getItem('wingo_widget_predictions');
+    if (savedPred) try { predictionHistory = JSON.parse(savedPred); } catch(e) {}
   }
 
-  function savePredictionHistory() {
-    localStorage.setItem('wingo_pred_history_v5', JSON.stringify(predictionHistory.slice(-200)));
-    updateHistoryStats();
-  }
-
-  // ==========================================
-  // UI RENDERING
-  // ==========================================
   function renderLiveTable() {
-    const tbody = document.getElementById('liveTableBody');
+    const tbody = document.getElementById('wingo-live-tbody');
+    if (!tbody) return;
     if (!liveHistory.length) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...✨</td></tr>';
-      document.getElementById('liveTotalCount').innerText = '0';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">No data yet...</td></tr>';
+      document.getElementById('wingo-total-count').innerText = '0';
       return;
     }
     let html = '';
-    liveHistory.slice(0, 50).forEach(row => {
-      const numVal = row.number;
-      const numberClass = getNumberClass(numVal);
-      const dotMarkup = getDotHtml(numVal);
-      const resultClass = (row.result === 'BIG') ? 'big-result' : 'small-result';
+    liveHistory.slice(0, 30).forEach(row => {
       html += `<tr>
         <td style="font-family:monospace;">${row.period}</td>
-        <td class="${numberClass}"><strong>${numVal}</strong></td>
-        <td class="${resultClass}" style="font-weight:700;">${row.result}</td>
-        <td class="dot-cell">${dotMarkup}</td>
+        <td class="${getNumberClass(row.number)}"><strong>${row.number}</strong></td>
+        <td class="${row.result === 'BIG' ? 'history-big' : 'history-small'}">${row.result}</td>
+        <td>${getDotHtml(row.number)}</span></td>
       </tr>`;
     });
     tbody.innerHTML = html;
-    document.getElementById('liveTotalCount').innerText = liveHistory.length;
+    document.getElementById('wingo-total-count').innerText = liveHistory.length;
   }
 
   function renderHistoryTable() {
-    const tbody = document.getElementById('historyTableBody');
+    const tbody = document.getElementById('wingo-history-tbody');
+    if (!tbody) return;
     if (!predictionHistory.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No predictions yet</td></tr>';
       return;
     }
     let html = '';
-    predictionHistory.slice(0, 50).forEach(p => {
-      const correctMark = p.correct ? '✅' : '❌';
-      const actualClass = p.actualResult ? (p.actualResult === 'BIG' ? 'big-result' : 'small-result') : '';
+    predictionHistory.slice(0, 30).forEach(p => {
       html += `<tr>
         <td style="font-family:monospace;">${p.period}</td>
-        <td class="${p.predictedResult === 'BIG' ? 'big-result' : 'small-result'}">${p.predictedResult}</td>
+        <td class="${p.predictedResult === 'BIG' ? 'history-big' : 'history-small'}">${p.predictedResult}</td>
         <td class="${getNumberClass(p.predictedNumber)}"><strong>${p.predictedNumber}</strong></td>
-        <td class="${actualClass}">${p.actualResult || 'pending'} ${p.actualNumber !== undefined ? p.actualNumber : ''}</td>
-        <td class="match-cell">${correctMark}</td>
+        <td class="${p.actualResult === 'BIG' ? 'history-big' : 'history-small'}">${p.actualResult || 'pending'}</td>
+        <td>${p.correct ? '✅' : '❌'}</td>
       </tr>`;
     });
     tbody.innerHTML = html;
+    const statsDiv = document.getElementById('wingo-history-stats');
+    if (statsDiv) {
+      const correct = predictionHistory.filter(p => p.correct === true).length;
+      statsDiv.innerHTML = `📜 PREDICTION HISTORY — ✅ ${correct}  |  ❌ ${predictionHistory.length - correct}  |  Total: ${predictionHistory.length}`;
+    }
   }
 
-  function updateHistoryStats() {
-    const statsDiv = document.getElementById('historyStats');
-    if (!statsDiv) return;
-    const total = predictionHistory.length;
-    const correct = predictionHistory.filter(p => p.correct === true).length;
-    const incorrect = total - correct;
-    statsDiv.innerHTML = `📜 PREDICTION HISTORY — ✅ ${correct}  |  ❌ ${incorrect}  |  Total: ${total}`;
-  }
-
-  // ==========================================
-  // FUTURE PERIOD CALCULATION
-  // ==========================================
   function getNextPeriod() {
     if (liveHistory.length === 0) return "----";
     let maxPeriod = liveHistory[0].period;
@@ -579,17 +256,13 @@
       let match = h.period.match(/\d+$/);
       if (match) {
         let num = parseInt(match[0], 10);
-        if (num > maxNum) {
-          maxNum = num;
-          maxPeriod = h.period;
-        }
+        if (num > maxNum) { maxNum = num; maxPeriod = h.period; }
       }
     }
     const match = maxPeriod.match(/\d+$/);
     if (match) {
       let numStr = match[0];
-      let num = parseInt(numStr, 10);
-      let nextNum = num + 1;
+      let nextNum = parseInt(numStr, 10) + 1;
       let nextNumStr = nextNum.toString();
       while (nextNumStr.length < numStr.length) nextNumStr = "0" + nextNumStr;
       return maxPeriod.slice(0, maxPeriod.length - numStr.length) + nextNumStr;
@@ -597,150 +270,96 @@
     return maxPeriod + "+1";
   }
 
-  // ==========================================
-  // PATTERN RECOGNITION (A=SMALL, B=BIG)
-  // ==========================================
   function convertToAB(history) {
     return history.map(h => h.result === 'SMALL' ? 'A' : 'B');
   }
 
-  const patterns = [
-    { name: "1A1B (ABAB)", regex: /^(AB)+$/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.75 },
-    { name: "2A2B (AABB)", regex: /^(AABB)+$/, next: (seq) => {
-      let last = seq.slice(-2).join('');
-      if (last === 'AA') return 'B';
-      if (last === 'BB') return 'A';
-      return 'A';
-    }, weight: 0.7 },
-    { name: "3A3B (AAABBB)", regex: /^(AAABBB)+$/, next: (seq) => {
-      let lastThree = seq.slice(-3).join('');
-      if (lastThree === 'AAA') return 'B';
-      if (lastThree === 'BBB') return 'A';
-      return 'A';
-    }, weight: 0.7 },
-    { name: "4A4B (AAAABBBB)", regex: /^(AAAABBBB)+$/, next: (seq) => seq.slice(-4).join('') === 'AAAA' ? 'B' : 'A', weight: 0.7 },
-    { name: "1A2B (ABB)", regex: /^(ABB)+$/, next: (seq) => seq.slice(-3).join('') === 'ABB' ? 'A' : 'B', weight: 0.7 },
-    { name: "2A1B (AAB)", regex: /^(AAB)+$/, next: (seq) => seq.slice(-2).join('') === 'AA' ? 'B' : 'A', weight: 0.7 },
-    { name: "Long streak A (≥5)", regex: /^A{5,}$/, next: () => 'B', weight: 0.85 },
-    { name: "Long streak B (≥5)", regex: /^B{5,}$/, next: () => 'A', weight: 0.85 },
-    { name: "Mirror trend", regex: /^ABABABAB/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.75 }
-  ];
-
   function detectPattern(abSeq) {
-    if (abSeq.length < 2) return null;
-    let testSeq = abSeq.join('');
-    for (let p of patterns) {
-      if (p.regex.test(testSeq) || (testSeq.length > 12 && p.regex.test(testSeq.slice(-12)))) {
-        let next = p.next(abSeq);
-        return { pattern: p.name, next, confidence: p.weight };
-      }
+    if (abSeq.length < 3) return { pattern: "Insufficient", next: 'B', confidence: 0.55 };
+    const seqStr = abSeq.join('');
+    if (/^(AB)+$/.test(seqStr) || /^(BA)+$/.test(seqStr)) {
+      const next = seqStr[seqStr.length - 1] === 'A' ? 'B' : 'A';
+      return { pattern: "Alternating (ABAB)", next, confidence: 0.78 };
     }
-    let recent = abSeq.slice(0,6);
-    let aCount = recent.filter(c => c === 'A').length;
-    let bCount = recent.length - aCount;
-    let next = aCount > bCount ? 'B' : 'A';
-    let conf = Math.max(aCount, bCount) / recent.length;
+    if (/^(AABB)+$/.test(seqStr)) {
+      const lastTwo = seqStr.slice(-2);
+      if (lastTwo === 'AA') return { pattern: "2A2B (AABB)", next: 'B', confidence: 0.72 };
+      if (lastTwo === 'BB') return { pattern: "2A2B (AABB)", next: 'A', confidence: 0.72 };
+      return { pattern: "2A2B (AABB)", next: 'A', confidence: 0.65 };
+    }
+    if (/^A{5,}$/.test(seqStr)) return { pattern: "Long streak A", next: 'B', confidence: 0.85 };
+    if (/^B{5,}$/.test(seqStr)) return { pattern: "Long streak B", next: 'A', confidence: 0.85 };
+    const recent = abSeq.slice(0, 6);
+    const aCount = recent.filter(c => c === 'A').length;
+    const bCount = recent.length - aCount;
+    const next = aCount > bCount ? 'B' : 'A';
+    const conf = Math.max(aCount, bCount) / recent.length;
     return { pattern: "Weighted recency", next, confidence: conf };
   }
 
-  function predictNumberMatchingResult(history, targetResult) {
+  function predictNumber(history, targetResult) {
     if (history.length === 0) return targetResult === 'BIG' ? 7 : 2;
     let scores = Array(10).fill(0);
     let totalWeight = 0;
     for (let i = 0; i < Math.min(history.length, 30); i++) {
       let weight = Math.pow(0.88, i);
-      let num = history[i].number;
-      scores[num] += weight;
+      scores[history[i].number] += weight;
       totalWeight += weight;
     }
     if (history[0]) scores[history[0].number] *= 0.4;
-    
-    let candidates = targetResult === 'BIG' ? [5, 6, 7, 8, 9] : [0, 1, 2, 3, 4];
-    let bestNum = candidates[0];
-    let bestScore = -1;
+    let candidates = targetResult === 'BIG' ? [5,6,7,8,9] : [0,1,2,3,4];
+    let bestNum = candidates[0], bestScore = -1;
     for (let num of candidates) {
-      if (scores[num] > bestScore) {
-        bestScore = scores[num];
-        bestNum = num;
-      }
+      if (scores[num] > bestScore) { bestScore = scores[num]; bestNum = num; }
     }
-    let confidence = totalWeight > 0 ? bestScore / totalWeight : 0.5;
-    return { number: bestNum, conf: Math.min(0.85, confidence + 0.1) };
+    return { number: bestNum, conf: bestScore / totalWeight };
   }
 
-  function generateStablePrediction() {
+  function generatePrediction() {
     if (liveHistory.length === 0) {
       currentPrediction = 'BIG';
       currentPredictedNumber = 7;
-      lastPatternName = "Initial";
       lastConfidence = 0.5;
       return;
     }
     const abSeq = convertToAB(liveHistory);
-    const patternResult = detectPattern(abSeq);
-    let predictedResult = patternResult.next === 'A' ? 'SMALL' : 'BIG';
-    let patternConf = patternResult.confidence;
-    const numPred = predictNumberMatchingResult(liveHistory, predictedResult);
-    let predictedNumber = numPred.number;
-    let numConf = numPred.conf;
-    let overallConf = (patternConf + numConf) / 2;
-    overallConf = Math.min(0.94, Math.max(0.52, overallConf));
+    const pattern = detectPattern(abSeq);
+    const predictedResult = pattern.next === 'A' ? 'SMALL' : 'BIG';
+    const numPred = predictNumber(liveHistory, predictedResult);
     currentPrediction = predictedResult;
-    currentPredictedNumber = predictedNumber;
-    lastPatternName = patternResult.pattern;
-    lastConfidence = overallConf;
+    currentPredictedNumber = numPred.number;
+    lastPatternName = pattern.pattern;
+    lastConfidence = (pattern.confidence + numPred.conf) / 2;
   }
 
-  // ==========================================
-  // UI UPDATE
-  // ==========================================
-  function updateUIWithCurrentPrediction() {
+  function updateUI() {
     if (!currentPrediction) return;
     const bigCount = liveHistory.filter(r => r.result === 'BIG').length;
     const smallCount = liveHistory.length - bigCount;
-    document.getElementById('bigStat').innerText = bigCount;
-    document.getElementById('smallStat').innerText = smallCount;
+    document.getElementById('wingo-big-count').innerText = bigCount;
+    document.getElementById('wingo-small-count').innerText = smallCount;
     const confPercent = Math.floor(lastConfidence * 100);
-    document.getElementById('confStat').innerText = `${confPercent}%`;
-    document.getElementById('confidenceFill').style.width = `${confPercent}%`;
+    document.getElementById('wingo-confidence').innerText = `${confPercent}%`;
+    document.getElementById('wingo-confidence-fill').style.width = `${confPercent}%`;
 
     const displayData = getNumberDisplayData(currentPredictedNumber);
     let dotHtml = '';
     if (displayData.dual) {
-      let classes = displayData.dotClass.split(' ');
-      dotHtml = `<div class="dual-dot-container">${classes.map(c => `<div class="dual-dot ${c}" style="width:56px; height:56px; border-radius:56px;"></div>`).join('')}</div>`;
+      dotHtml = `<div class="dual-dot-container" style="display:flex; gap:6px;">${displayData.dotClass.split(' ').map(c => `<div class="dual-dot ${c}" style="width:40px; height:40px; border-radius:40px;"></div>`).join('')}</div>`;
     } else if (displayData.dotClass) {
-      dotHtml = `<div class="prediction-dot ${displayData.dotClass}" style="width:56px; height:56px; border-radius:56px;"></div>`;
+      dotHtml = `<div class="prediction-dot ${displayData.dotClass}" style="width:40px; height:40px; border-radius:40px;"></div>`;
     } else {
-      dotHtml = `<div style="width:56px; height:56px; border-radius:56px; background:#aaa;"></div>`;
+      dotHtml = `<div style="width:40px; height:40px; border-radius:40px; background:#aaa;"></div>`;
     }
-    const resultClass = (currentPrediction === 'BIG') ? 'big-result' : 'small-result';
-    const bigSmallText = (currentPrediction === 'BIG') ? 'BIG' : 'SMALL';
-    document.getElementById('predictionArea').innerHTML = `
-      <div class="prediction-row">
-        ${dotHtml}
-        <div class="prediction-big-small ${resultClass}">${bigSmallText}</div>
-        <div class="prediction-number ${displayData.textClass}">${currentPredictedNumber}</div>
-      </div>
-    `;
-    document.getElementById('trendName').innerHTML = `🎯 ${currentPrediction} · Predicted ${currentPredictedNumber}`;
-    const lastActual = liveHistory[0] ? `${liveHistory[0].result} ${liveHistory[0].number}` : 'none';
-    document.getElementById('trendDesc').innerHTML = `🧠 ${lastPatternName} | ${liveHistory.length} rounds | Last actual: ${lastActual} (not copied)`;
-    document.getElementById('futurePeriodDisplay').innerText = getNextPeriod();
+    document.getElementById('wingo-prediction-result').innerHTML = currentPrediction === 'BIG' ? '<span class="big-result">🔴 BIG</span>' : '<span class="small-result">🟢 SMALL</span>';
+    document.getElementById('wingo-prediction-number').innerHTML = `<div class="prediction-number ${displayData.textClass}" style="font-size:42px; font-weight:800;">${currentPredictedNumber}</div>`;
+    document.getElementById('wingo-prediction-dot').innerHTML = dotHtml;
+    document.getElementById('wingo-trend-name').innerHTML = `🎯 ${currentPrediction} · Predicted ${currentPredictedNumber}`;
+    document.getElementById('wingo-trend-desc').innerHTML = `🧠 ${lastPatternName} | ${liveHistory.length} rounds | Last: ${liveHistory[0]?.result} ${liveHistory[0]?.number}`;
+    document.getElementById('wingo-next-period').innerText = getNextPeriod();
   }
 
-  function updateUIDefault() {
-    document.getElementById('bigStat').innerText = '0';
-    document.getElementById('smallStat').innerText = '0';
-    document.getElementById('confStat').innerText = '0%';
-    document.getElementById('confidenceFill').style.width = '0%';
-    document.getElementById('predictionArea').innerHTML = '<div class="prediction-row">---</div>';
-    document.getElementById('trendName').innerHTML = '📊 AWAITING DATA';
-    document.getElementById('trendDesc').innerHTML = 'Fetching first rounds...';
-    document.getElementById('futurePeriodDisplay').innerText = '----';
-  }
-
-  function onNewRoundData() {
+  function onNewData() {
     if (liveHistory.length > 0 && currentPrediction) {
       const latestRound = liveHistory[0];
       const existing = predictionHistory.find(p => p.period === latestRound.period);
@@ -753,129 +372,222 @@
           actualNumber: latestRound.number,
           correct: (currentPrediction === latestRound.result)
         });
-        savePredictionHistory();
+        saveToLocalStorage();
         renderHistoryTable();
       }
     }
-    generateStablePrediction();
-    updateUIWithCurrentPrediction();
+    generatePrediction();
+    updateUI();
   }
 
   // ==========================================
-  // API FETCHING
+  // FETCH REAL DATA FROM GAME API (NO CORS)
   // ==========================================
-  async function fetchLiveData() {
+  async function fetchGameData() {
     try {
-      const res = await fetch(FIXED_API_URL);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
-      const newHistory = data.history || [];
+      const ts = Date.now();
+      const url = `https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?ts=${ts}`;
+      
+      const response = await fetch(url, {
+        credentials: 'include',
+        headers: { 'Referer': 'https://hgnice.club/', 'Accept': 'application/json' }
+      });
+      
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      
+      const data = await response.json();
+      let list = data.data?.list || data.list || [];
+      
+      if (list.length === 0) throw new Error('No data');
+      
+      const newHistory = list.map(item => ({
+        period: String(item.issueNumber || item.period || ''),
+        number: parseInt(item.number || 0, 10),
+        result: (item.number || 0) >= 5 ? 'BIG' : 'SMALL'
+      })).filter(item => item.period);
+      
+      newHistory.sort((a, b) => b.period.localeCompare(a.period));
+      
       const existingSet = new Set(liveHistory.map(h => h.period));
       let added = 0;
       for (const item of newHistory) {
-        if (item.period && !existingSet.has(item.period) && typeof item.number !== 'undefined') {
-          let finalResult = item.result;
-          if (!finalResult) finalResult = getResultFromNumber(item.number);
-          liveHistory.unshift({
-            period: String(item.period),
-            number: item.number,
-            result: finalResult
-          });
-          existingSet.add(item.period);
+        if (!existingSet.has(item.period)) {
+          liveHistory.unshift(item);
           added++;
         }
       }
+      
       if (added > 0) {
-        liveHistory.sort((a,b) => String(b.period).localeCompare(String(a.period)));
-        saveLiveHistory();
+        liveHistory.sort((a, b) => b.period.localeCompare(a.period));
+        saveToLocalStorage();
         renderLiveTable();
-        onNewRoundData();
+        onNewData();
       }
-    } catch (err) {
-      console.warn('Fetch error:', err);
+      
+      document.getElementById('wingo-trend-desc').innerHTML = `✅ ${liveHistory.length} rounds | Last: ${liveHistory[0]?.result} ${liveHistory[0]?.number}`;
+      
+    } catch (error) {
+      console.error('Fetch error:', error);
+      document.getElementById('wingo-trend-desc').innerHTML = `⚠️ Error: ${error.message}. Make sure you're on hgnice.club!`;
     }
   }
 
-  // ==========================================
-  // PRECISE TIMER (30-second round sync)
-  // ==========================================
-  function startTimerLoop() {
-    function tick() {
-      if (!roundSyncActive) {
-        if (animationFrame) cancelAnimationFrame(animationFrame);
-        return;
-      }
+  // Timer
+  function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
       const now = new Date();
-      const ms = now.getMilliseconds();
       const sec = now.getSeconds();
-      let remaining;
-      if (sec < 30) remaining = 30 - sec - (ms / 1000);
-      else remaining = 60 - sec - (ms / 1000);
+      const ms = now.getMilliseconds();
+      let remaining = sec < 30 ? 30 - sec - (ms/1000) : 60 - sec - (ms/1000);
       if (remaining < 0) remaining = 0;
-      const timerElem = document.getElementById('roundTimerDisplay');
+      const timerElem = document.getElementById('wingo-timer');
       if (timerElem) {
         timerElem.innerText = `${Math.ceil(remaining)}s`;
         timerElem.style.color = remaining <= 3 ? '#ff8866' : '#ffcc88';
       }
-      if ((sec === 0 || sec === 30) && ms < 80) {
-        if (lastTriggeredSecond !== sec) {
-          lastTriggeredSecond = sec;
-          fetchLiveData();
+      if ((sec === 0 || sec === 30) && ms < 100) {
+        if (lastFetchSecond !== sec) {
+          lastFetchSecond = sec;
+          fetchGameData();
         }
       } else {
-        if (sec !== 0 && sec !== 30) lastTriggeredSecond = -1;
+        if (sec !== 0 && sec !== 30) lastFetchSecond = -1;
       }
-      animationFrame = requestAnimationFrame(tick);
-    }
-    if (animationFrame) cancelAnimationFrame(animationFrame);
-    animationFrame = requestAnimationFrame(tick);
-  }
-
-  function startAutoSync() {
-    if (roundSyncActive) return;
-    roundSyncActive = true;
-    fetchLiveData();
-    startTimerLoop();
+    }, 100);
   }
 
   // ==========================================
-  // TAB SWITCHING
+  // CREATE WIDGET
   // ==========================================
-  function setupTabs() {
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
+  function createWidget() {
+    if (document.getElementById('wingo-main-widget')) return;
+    
+    widgetElement = document.createElement('div');
+    widgetElement.id = 'wingo-main-widget';
+    widgetElement.className = 'wingo-widget';
+    widgetElement.innerHTML = `
+      <div class="wingo-widget-header" id="wingo-drag-handle">
+        <span>⚡ WINGO · REAL DATA AI</span>
+        <div class="wingo-widget-controls">
+          <button id="wingo-minimize">−</button>
+          <button id="wingo-close">✕</button>
+        </div>
+      </div>
+      <div class="wingo-widget-body" id="wingo-widget-body">
+        <div class="wingo-timer-section">
+          <div><span class="wingo-label">Next Period:</span><br><span id="wingo-next-period" class="wingo-period-value">----</span></div>
+          <div><span class="wingo-label">Round ends in:</span><br><span id="wingo-timer" class="wingo-timer-value">--s</span></div>
+        </div>
+        <div class="wingo-prediction">
+          <div id="wingo-prediction-result" class="wingo-prediction-result">---</div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 8px;">
+            <div id="wingo-prediction-dot"></div>
+            <div id="wingo-prediction-number" class="wingo-prediction-number">--</div>
+          </div>
+        </div>
+        <div class="wingo-stats">
+          <div>🔴 BIG: <b id="wingo-big-count">0</b></div>
+          <div>🟢 SMALL: <b id="wingo-small-count">0</b></div>
+          <div>📊 CONF: <b id="wingo-confidence">0%</b></div>
+        </div>
+        <div class="wingo-tabs">
+          <button class="wingo-tab active" data-tab="live">📡 LIVE DATA</button>
+          <button class="wingo-tab" data-tab="history">📜 HISTORY</button>
+        </div>
+        <div class="wingo-tab-content active" id="wingo-live-tab">
+          <div style="font-size:11px; margin-bottom:8px;">TOTAL ROUNDS: <b id="wingo-total-count">0</b></div>
+          <div class="wingo-table-wrapper">
+            <table class="wingo-table">
+              <thead><tr><th>PERIOD</th><th>NUMBER</th><th>RESULT</th><th>PATTERN</th></tr></thead>
+              <tbody id="wingo-live-tbody"><tr><td colspan="4">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="wingo-tab-content" id="wingo-history-tab">
+          <div id="wingo-history-stats" class="wingo-label" style="margin-bottom:8px;">📜 PREDICTION HISTORY</div>
+          <div class="wingo-table-wrapper">
+            <table class="wingo-table">
+              <thead><tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>✅/❌</th></tr></thead>
+              <tbody id="wingo-history-tbody"><tr><td colspan="5">No predictions yet</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="wingo-trend-card" style="background:rgba(0,0,0,0.3); border-radius:12px; padding:10px; margin-top:12px;">
+          <div id="wingo-trend-name" style="font-weight:800; font-size:13px; color:#ffdfb0;">📊 ANALYZING...</div>
+          <div id="wingo-trend-desc" style="font-size:10px; color:#cbd5ff; margin-top:4px;">Fetching game data...</div>
+          <div class="confidence-bar" style="background:#252d4a; border-radius:40px; height:4px; width:100%; margin-top:8px;">
+            <div id="wingo-confidence-fill" style="background:linear-gradient(90deg,#44ffaa,#ffcc44); width:0%; height:4px; border-radius:40px;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(widgetElement);
+    
+    // Drag functionality
+    const dragHeader = document.getElementById('wingo-drag-handle');
+    dragHeader.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button')) return;
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      const rect = widgetElement.getBoundingClientRect();
+      widgetStartX = rect.left;
+      widgetStartY = rect.top;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      widgetElement.style.left = `${widgetStartX + (e.clientX - dragStartX)}px`;
+      widgetElement.style.top = `${widgetStartY + (e.clientY - dragStartY)}px`;
+      widgetElement.style.right = 'auto';
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+    
+    // Minimize
+    document.getElementById('wingo-minimize').addEventListener('click', () => {
+      const body = document.getElementById('wingo-widget-body');
+      body.style.display = body.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    // Close
+    document.getElementById('wingo-close').addEventListener('click', () => {
+      widgetElement.remove();
+      if (timerInterval) clearInterval(timerInterval);
+    });
+    
+    // Tabs
+    document.querySelectorAll('.wingo-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        const tabId = tab.dataset.tab;
-        if (!tabId) return;
-        tabs.forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.wingo-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.wingo-tab-content').forEach(c => c.classList.remove('active'));
         tab.classList.add('active');
-        document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
-        const activePanel = document.getElementById(`${tabId}Tab`);
-        if (activePanel) activePanel.classList.add('active');
+        document.getElementById(`wingo-${tab.dataset.tab}-tab`).classList.add('active');
       });
     });
   }
 
   // ==========================================
-  // UI BOOT
+  // INIT
   // ==========================================
-  document.getElementById('unlockBtn').addEventListener('click', () => {
-    const key = document.getElementById('vipKey').value.trim();
-    if (['HB12', 'VIP999'].includes(key)) {
-      document.getElementById('loginPanel').style.display = 'none';
-      document.getElementById('mainPanel').style.display = 'block';
-      startAutoSync();
-      setupTabs();
-    } else alert('Invalid key');
-  });
-
-  document.getElementById('minimizeBtn').addEventListener('click', () => {
-    const c = document.getElementById('content');
-    c.style.display = c.style.display === 'none' ? 'block' : 'none';
-  });
-
-  loadLiveHistory();
+  function init() {
+    createWidget();
+    loadFromLocalStorage();
+    renderLiveTable();
+    renderHistoryTable();
+    generatePrediction();
+    updateUI();
+    fetchGameData();
+    startTimer();
+  }
+  
+  // Check if we're on hgnice.club
+  if (window.location.hostname.includes('hgnice.club')) {
+    init();
+  } else {
+    console.warn('Widget only works on hgnice.club');
+  }
 })();
 </script>
 </body>
