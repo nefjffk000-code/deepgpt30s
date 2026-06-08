@@ -1,0 +1,9 @@
+{
+  "name": "aipredictor",
+  "version": "1.0.0",
+  "description": "WINGO Pattern Predictor with Webshare Proxy",
+  "type": "module",
+  "dependencies": {
+    "https-proxy-agent": "^7.0.0"
+  }
+}
