@@ -451,6 +451,8 @@
         <button class="tab" data-tab="history">📜 HISTORY</button>
       </div>
       <div class="panel active" id="predictTab">
+        <!-- Early result flash banner — shown when result detected before game UI -->
+        <div id="earlyResultBanner" style="display:none; margin-bottom:12px; padding:14px 18px; border-radius:18px; text-align:center; font-size:15px; font-weight:800; letter-spacing:0.8px; color:#fff; transition:opacity 0.5s ease; position:relative; overflow:hidden;"></div>
         <!-- Bulk history load progress — hidden once done -->
         <div id="bulkLoadBar" style="display:none; margin-bottom:10px; padding:8px 12px; border-radius:12px; background:rgba(255,180,80,0.07); border:1px solid rgba(255,180,80,0.18);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -487,8 +489,9 @@
       </div>
       </div>
       <div class="panel" id="liveTab">
-        <div class="info-note">
-          🔗 FIXED API · Auto‑sync at round end (0s & 30s) &nbsp;|&nbsp; TOTAL ROUNDS: <b id="liveTotalCount">0</b>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <div class="info-note" style="flex:1; margin:0;">🔗 LIVE · Auto‑sync every round &nbsp;|&nbsp; ROUNDS: <b id="liveTotalCount">0</b></div>
+          <button id="refreshAllBtn" title="Refresh all 500 rounds" style="flex-shrink:0; background:rgba(255,150,80,0.10); border:1px solid rgba(255,180,100,0.25); border-radius:40px; color:rgba(255,200,140,0.75); font-size:11px; font-weight:700; padding:6px 13px; cursor:pointer; transition:0.2s; letter-spacing:0.3px; white-space:nowrap;">↺ Refresh All</button>
         </div>
         <div class="live-table-wrap">
           <table class="live-table">
@@ -1581,14 +1584,15 @@
     }
   }
 
-  async function fetchBulkHistory() {
-    if (bulkLoaded) return;
+  async function fetchBulkHistory(force) {
+    if (bulkLoaded && !force) return;
     bulkLoaded = true;
-    setBulkStatus('📥 Loading history…', 0);
+    setBulkStatus('📥 Loading all 500 rounds…', 0);
     try {
-      const res = await fetch('/api/wingo/bulk?pages=20');
+      const res = await fetch('/api/wingo/bulk?pages=50');
       const data = await res.json();
       if (!data.success || !Array.isArray(data.history)) { setBulkStatus('', 1, true); return; }
+      setBulkStatus(`📥 Processing ${data.history.length} rounds…`, 0.6);
       const existingSet = new Set(liveHistory.map(h => h.period));
       let added = 0;
       for (const item of data.history) {
@@ -1606,8 +1610,12 @@
         generateStablePrediction();
         updateUIWithCurrentPrediction();
       }
-    } catch(e) { console.warn('fetchBulkHistory error:', e); }
-    setBulkStatus('', 1, true);
+      setBulkStatus(`✅ ${liveHistory.length} rounds loaded`, 1);
+      setTimeout(() => setBulkStatus('', 1, true), 2000);
+    } catch(e) {
+      console.warn('fetchBulkHistory error:', e);
+      setBulkStatus('', 1, true);
+    }
   }
 
   let fetchInterval = null;
@@ -1758,10 +1766,9 @@
   function startEarlyPoll() {
     if (earlyPollActive) return;
     if (!gameStatePeriod) return;
-    if (earlyShownPeriod === gameStatePeriod) return;  // already done this round
     earlyPollActive = true;
-    // Auto-stop after 12 s (safety net)
-    setTimeout(() => { if (earlyPollActive) { earlyPollActive = false; } }, 12000);
+    // Auto-stop after 25s (safety net)
+    setTimeout(() => { earlyPollActive = false; }, 25000);
     runEarlyPoll();
   }
 
@@ -1777,9 +1784,9 @@
       const data = await res.json();
       if (data.success && data.latest) {
         const item = data.latest;
-        // Result is ready when it matches the period we are/were tracking
+        const alreadyShown     = earlyShownPeriod === item.period;
         const alreadyInHistory = liveHistory.find(h => h.period === item.period);
-        if (!alreadyInHistory) {
+        if (!alreadyShown && !alreadyInHistory) {
           earlyPollActive  = false;
           earlyShownPeriod = item.period;
           showEarlyResult(item);
@@ -1787,34 +1794,64 @@
         }
       }
     } catch(e) {}
-    if (earlyPollActive) earlyPollTimer = setTimeout(runEarlyPoll, 100);
+    if (earlyPollActive) earlyPollTimer = setTimeout(runEarlyPoll, 50);
   }
 
   function showEarlyResult(item) {
+    // Remaining seconds on the NEW round at the moment we detected the result.
+    // The game wheel animation takes ~8s to reveal — we fire well before that.
+    const currentRemain = (gameRemainMs !== null && gameRemainAt !== null)
+      ? Math.max(0, gameRemainMs - (Date.now() - gameRemainAt)) / 1000
+      : null;
+    const earlyLabel = currentRemain !== null
+      ? `~${currentRemain.toFixed(0)}s BEFORE GAME REVEALS`
+      : 'EARLY';
+
     // 1. Prepend to live history so predictions update immediately
     liveHistory.unshift(item);
     saveLiveHistory();
-    renderLiveTable();   // update Live Data tab immediately
+    renderLiveTable();
     onNewRoundData();
-    // Also sync full history from server in background
-    fetchLiveData();
+    fetchLiveData();  // background sync
 
-    // 2. Flash the banner
+    // 2. Giant banner flash
     const isBig = item.result === 'BIG';
-    const accent = isBig ? '#ff7744' : '#44aaff';
-    const bg     = isBig
-      ? 'linear-gradient(135deg,rgba(255,80,30,0.32),rgba(255,150,50,0.22))'
-      : 'linear-gradient(135deg,rgba(30,100,255,0.32),rgba(60,180,255,0.22))';
+    const accent  = isBig ? '#ff6622' : '#22aaff';
+    const accent2 = isBig ? '#ffcc44' : '#88eeff';
+    const bg = isBig
+      ? 'linear-gradient(135deg,rgba(255,60,10,0.55),rgba(255,130,20,0.40))'
+      : 'linear-gradient(135deg,rgba(10,80,255,0.50),rgba(30,200,255,0.38))';
+    const border = isBig ? 'rgba(255,120,40,0.80)' : 'rgba(40,180,255,0.80)';
+
     const banner = document.getElementById('earlyResultBanner');
     if (!banner) return;
-    banner.style.cssText += `;background:${bg};border-color:${accent}88;`;
-    banner.innerHTML = `⚡ EARLY RESULT &nbsp;·&nbsp; <span style="color:${accent};font-size:1.18em;letter-spacing:1px;">${item.result}</span> &nbsp;<span style="opacity:0.45;font-size:0.82em;">#${item.number}</span>`;
-    banner.style.display  = 'block';
-    banner.style.opacity  = '1';
-    banner.style.animation = 'earlyFlash 0.5s ease-out';
-    // Fade out after 5 s
-    setTimeout(() => { if (banner) banner.style.opacity = '0.35'; }, 4500);
-    setTimeout(() => { if (banner) { banner.style.display = 'none'; banner.style.opacity = '1'; banner.style.animation = ''; } }, 6000);
+
+    banner.style.cssText = `
+      display:block; opacity:1; margin-bottom:12px;
+      padding:14px 18px; border-radius:18px;
+      background:${bg};
+      border:2px solid ${border};
+      text-align:center; font-weight:800; color:#fff;
+      box-shadow:0 0 28px ${accent}55, 0 4px 16px rgba(0,0,0,0.4);
+      animation:earlyFlash 0.4s ease-out;
+      transition:opacity 0.5s ease;
+      position:relative; overflow:hidden;
+    `;
+
+    banner.innerHTML = `
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;opacity:0.75;text-transform:uppercase;margin-bottom:6px;">
+        ⚡ RESULT DETECTED &nbsp;·&nbsp; ${earlyLabel} BEFORE GAME
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
+        <span style="font-size:28px;font-weight:900;letter-spacing:2px;color:${accent2};text-shadow:0 0 12px ${accent};">${item.result}</span>
+        <span style="font-size:22px;font-weight:800;opacity:0.85;">#${item.number}</span>
+      </div>
+      <div style="font-size:9.5px;opacity:0.55;margin-top:6px;letter-spacing:0.5px;">Period ${String(item.period).slice(-6)}</div>
+    `;
+
+    // Fade after 8s, hide at 10s
+    setTimeout(() => { if (banner) banner.style.opacity = '0.25'; }, 8000);
+    setTimeout(() => { if (banner) { banner.style.display = 'none'; banner.style.opacity = '1'; banner.style.animation = ''; } }, 10000);
   }
 
   // ── Real game-state timer (interpolated, floor-rounded to match game) ──
@@ -1834,10 +1871,10 @@
       const remaining = Math.max(0, gameRemainMs - elapsed);
       displaySec = Math.floor(remaining / 1000);
       if (remaining <= 800)  fetchGameState();
-      if (remaining <= 12000 && remaining > 0) startEarlyPoll();
+      if (remaining <= 20000 && remaining > 0) startEarlyPoll();
       if (remaining <= 0)    stopEarlyPoll();
-      // Adaptive state-poll speed: 200ms in last 10s, 1000ms otherwise
-      const wantFast = remaining > 0 && remaining <= 10000;
+      // Adaptive state-poll speed: 200ms in last 20s (API publishes ~13s early), else 1000ms
+      const wantFast = remaining > 0 && remaining <= 20000;
       if (wantFast && stateInterval && stateInterval._fastMode !== true) {
         clearInterval(stateInterval);
         stateInterval = setInterval(fetchGameState, 200);
@@ -1863,27 +1900,26 @@
       gameRemainMs = data.remainTime * 1000;
       gameRemainAt = Date.now();
 
-      // Period display
+      // Period display — update when period changes
       const period = data.issueNumber;
       if (period && period.length > 4 && period !== gameStatePeriod) {
         gameStatePeriod = period;
         domSet('futurePeriodDisplay', 'innerText', period);
+        fetchLiveData();  // sync full list on new period
+      }
 
-        // ── INSTANT result: use previous field from state response ──────────
-        // data.previous is the just-finished round — no extra API call needed
-        if (data.previous && data.previous.period) {
-          const prev = data.previous;
-          const alreadyHave = liveHistory.find(h => h.period === prev.period);
-          if (!alreadyHave) {
-            liveHistory.unshift(prev);
-            if (liveHistory.length > 500) liveHistory = liveHistory.slice(0, 500);
-            saveLiveHistory();
-            renderLiveTable();
-            onNewRoundData();
-          }
+      // ── EARLY RESULT CHECK — runs on EVERY state poll, not just on period change ──
+      // earlyCache.latest is the most recent completed round from the history API.
+      // It appears 2-3s into the new round while the game UI is still animating.
+      if (data.previous && data.previous.period) {
+        const prev = data.previous;
+        const alreadyShown   = earlyShownPeriod === prev.period;
+        const alreadyInHistory = liveHistory.find(h => h.period === prev.period);
+        if (!alreadyShown && !alreadyInHistory) {
+          earlyShownPeriod = prev.period;   // mark before async ops to prevent double-fire
+          earlyPollActive  = false;          // stop runEarlyPoll — we have the result
+          showEarlyResult(prev);
         }
-        // Also sync full list from server (fills any gaps)
-        fetchLiveData();
       }
     } catch(e) {}
   }
@@ -1916,11 +1952,14 @@
     // 4. Bulk-fetch all missed rounds in background (non-blocking)
     fetchBulkHistory();
 
-    // 4. Safety-net: poll every 3s if no active round timer
+    // 4. Safety-net: poll every 5s if no active round timer
     if (fetchInterval) clearInterval(fetchInterval);
     fetchInterval = setInterval(() => {
-      if (!nextRoundTimer && !fastPollActive) fetchLiveData();
-    }, 10000);
+      if (!nextRoundTimer && !fastPollActive && !earlyPollActive) fetchLiveData();
+    }, 5000);
+
+    // 5. Full refresh every 5 minutes to stay in sync with all 500 rounds
+    setInterval(() => { bulkLoaded = false; fetchBulkHistory(true); }, 5 * 60 * 1000);
   }
   function setupTabs() {
     document.querySelectorAll('.tab').forEach(tab => {
@@ -1949,6 +1988,21 @@
     const isHidden = c.style.display === 'none';
     c.style.display = isHidden ? 'block' : 'none';
     btn.textContent = isHidden ? '−' : '+';
+  });
+  document.getElementById('refreshAllBtn').addEventListener('click', function() {
+    this.textContent = '⏳ Loading…';
+    this.disabled = true;
+    bulkLoaded = false;
+    fetchBulkHistory(true).then(() => {
+      this.textContent = '↺ Refresh All';
+      this.disabled = false;
+    });
+  });
+  document.getElementById('refreshAllBtn').addEventListener('mouseenter', function() {
+    if (!this.disabled) { this.style.background = 'rgba(255,150,80,0.22)'; this.style.color = 'rgba(255,220,160,0.95)'; }
+  });
+  document.getElementById('refreshAllBtn').addEventListener('mouseleave', function() {
+    if (!this.disabled) { this.style.background = 'rgba(255,150,80,0.10)'; this.style.color = 'rgba(255,200,140,0.75)'; }
   });
   document.getElementById('resetHistoryBtn').addEventListener('click', () => {
     predictionHistory = [];
