@@ -37,16 +37,20 @@
     .widget {
       position: fixed;
       z-index: 10000;
-      top: 20px;
-      right: 20px;
-      width: min(480px, calc(100vw - 32px));
+      top: clamp(8px,2vw,12px);
+      right: clamp(8px,2vw,12px);
+      width: min(460px, calc(100vw - 16px));
+      max-height: calc(100dvh - 20px);
+      display: flex;
+      flex-direction: column;
       background: rgba(12, 15, 28, 0.85);
       backdrop-filter: blur(20px) saturate(180%);
-      border-radius: 32px;
+      border-radius: clamp(16px,4vw,32px);
       border: 1px solid rgba(255, 130, 150, 0.35);
       box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
-      transition: all 0.3s ease;
+      transition: box-shadow 0.3s ease, border 0.3s ease;
       overflow: hidden;
+      will-change: transform;
     }
 
     /* Header – elegant gradient */
@@ -54,15 +58,26 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 24px;
-      background: linear-gradient(135deg, rgba(255, 70, 110, 0.2), rgba(255, 150, 80, 0.1));
+      padding: clamp(10px,2.5vw,16px) clamp(14px,4vw,24px);
+      background: linear-gradient(135deg, rgb(40, 12, 22), rgb(28, 18, 8));
       border-bottom: 1px solid rgba(255, 220, 140, 0.3);
       cursor: grab;
+      position: relative;
+      z-index: 10;
+      flex-shrink: 0;
     }
     .widget-header:active { cursor: grabbing; }
+    #content {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #content::-webkit-scrollbar { display: none; }
 
     .widget-header h3 {
-      font-size: 1rem;
+      font-size: clamp(0.72rem,3.5vw,1rem);
       font-weight: 700;
       letter-spacing: -0.2px;
       background: linear-gradient(135deg, #fff0e0, #ffbc8c);
@@ -90,16 +105,9 @@
       transform: scale(1.02);
     }
 
-    /* Scroll‑free body */
     .widget-body {
-      padding: 24px;
-      overflow-y: auto;
-      max-height: 70vh;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    .widget-body::-webkit-scrollbar {
-      display: none;
+      padding: clamp(12px,3.5vw,24px);
+      overflow: visible;
     }
 
     /* Login panel */
@@ -123,7 +131,7 @@
     .login-area input:focus {
       outline: none;
       border-color: #ff6680;
-      box-shadow: 0 0 12px rgba(255, 102, 128, 0.3);
+      box-shadow: 0 0 1px rgba(255, 102, 128, 0.1);
     }
     .login-area button {
       background: linear-gradient(95deg, #ff3366, #ff884d);
@@ -158,7 +166,7 @@
       border: none;
       padding: 10px 0;
       border-radius: 60px;
-      font-size: 13px;
+      font-size: clamp(10px,3.5vw,13px);
       font-weight: 700;
       color: #ccd6ff;
       cursor: pointer;
@@ -187,23 +195,36 @@
       background: rgba(8, 12, 22, 0.7);
       backdrop-filter: blur(12px);
       border-radius: 80px;
-      padding: 14px 24px;
-      margin-bottom: 24px;
+      padding: clamp(10px,2.5vw,14px) clamp(14px,4vw,24px);
+      margin-bottom: clamp(12px,3vw,24px);
       display: flex;
       justify-content: space-between;
       align-items: baseline;
       border: 1px solid rgba(255, 180, 100, 0.5);
     }
+    .future-period-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .future-period-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: rgba(255,200,140,0.5);
+      text-transform: uppercase;
+    }
     .future-period {
       font-family: 'Fira Mono', monospace;
-      font-size: 18px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 700;
       color: #ffddb0;
       letter-spacing: 0.5px;
+      word-break: break-all;
     }
     .timer-value {
       font-family: 'Fira Mono', monospace;
-      font-size: 34px;
+      font-size: clamp(22px,6vw,34px);
       font-weight: 800;
       background: linear-gradient(135deg, #ffe6c0, #ffaa66);
       -webkit-background-clip: text;
@@ -252,40 +273,40 @@
       text-align: center;
       background: rgba(5, 8, 18, 0.7);
       backdrop-filter: blur(16px);
-      border-radius: 56px;
-      padding: 32px 20px;
-      margin: 24px 0;
+      border-radius: clamp(24px,6vw,56px);
+      padding: clamp(16px,4vw,32px) clamp(12px,3vw,20px);
+      margin: clamp(12px,3vw,24px) 0;
       border: 1px solid rgba(255, 200, 130, 0.5);
     }
     .prediction-row {
       display: flex;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
-      gap: 32px;
-      flex-wrap: wrap;
+      gap: 16px;
     }
     .prediction-dot {
-      width: 70px;
-      height: 70px;
-      border-radius: 70px;
+      width: clamp(24px,6vw,40px);
+      height: clamp(24px,6vw,40px);
+      border-radius: 50%;
     }
-    .green-dot { background: #22c55e; box-shadow: 0 0 20px #22c55e; }
-    .red-dot { background: #ef4444; box-shadow: 0 0 20px #ef4444; }
-    .purple-dot { background: #c084fc; box-shadow: 0 0 20px #c084fc; }
+    .green-dot { background: #22c55e; box-shadow: 0 0 2px #22c55e; }
+    .red-dot { background: #ef4444; box-shadow: 0 0 2px #ef4444; }
+    .purple-dot { background: #c084fc; box-shadow: 0 0 2px #c084fc; }
 
-    .dual-dot-container { display: flex; gap: 10px; }
-    .dual-dot { width: 70px; height: 70px; border-radius: 70px; }
+    .dual-dot-container { display: flex; gap: 6px; }
+    .dual-dot { width: clamp(24px,6vw,40px); height: clamp(24px,6vw,40px); border-radius: 50%; }
 
     .prediction-big-small {
-      font-size: 64px;
+      font-size: clamp(26px,8vw,54px);
       font-weight: 900;
       letter-spacing: 2px;
     }
-    .big-result { color: #ffcc44; text-shadow: 0 0 20px #ffaa33; }
-    .small-result { color: #44ffff; text-shadow: 0 0 20px #22ddff; }
+    .big-result { color: #ffcc44; text-shadow: 0 0 2px #ffaa33; }
+    .small-result { color: #44ffff; text-shadow: 0 0 2px #22ddff; }
 
     .prediction-number {
-      font-size: 72px;
+      font-size: clamp(26px,8vw,54px);
       font-weight: 800;
       font-family: monospace;
     }
@@ -331,21 +352,40 @@
     .live-table, .history-table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
       font-size: 12px;
     }
+    /* Live: PERIOD | NUMBER | RESULT | PATTERN */
+    .live-table th:nth-child(1), .live-table td:nth-child(1) { width:34%; text-align:left; padding-left:14px; }
+    .live-table th:nth-child(2), .live-table td:nth-child(2) { width:16%; text-align:center; }
+    .live-table th:nth-child(3), .live-table td:nth-child(3) { width:26%; text-align:center; }
+    .live-table th:nth-child(4), .live-table td:nth-child(4) { width:24%; text-align:center; }
+    /* History: PERIOD | PREDICTED | NUMBER | MATCH */
+    .history-table th:nth-child(1), .history-table td:nth-child(1) { width:34%; text-align:left; padding-left:14px; }
+    .history-table th:nth-child(2), .history-table td:nth-child(2) { width:24%; text-align:center; }
+    .history-table th:nth-child(3), .history-table td:nth-child(3) { width:18%; text-align:center; }
+    .history-table th:nth-child(4), .history-table td:nth-child(4) { width:24%; text-align:center; }
     .live-table th, .history-table th {
-      text-align: left;
-      padding: 14px 14px;
+      padding: 12px 8px;
       color: #ffbc6e;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgb(8, 11, 20);
       position: sticky;
       top: 0;
+      z-index: 2;
       font-weight: 600;
+      letter-spacing: 0.4px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
     .live-table td, .history-table td {
-      padding: 12px 14px;
-      border-bottom: 1px solid rgba(255, 200, 150, 0.15);
+      padding: 11px 8px;
+      border-bottom: 1px solid rgba(255,200,150,0.12);
       color: #f0f3fc;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      vertical-align: middle;
     }
     .dot-wrapper { display: inline-flex; gap: 6px; align-items: center; }
     .dot { width: 12px; height: 12px; border-radius: 12px; }
@@ -356,14 +396,40 @@
       background: rgba(0, 0, 0, 0.4);
       padding: 8px 16px;
       border-radius: 40px;
-      margin: 12px 0;
+      margin: 12px 8px;
       text-align: center;
+    }
+  
+    /* ── RESPONSIVE: very small phones (< 360px) ── */
+    @media (max-width: 360px) {
+      .widget { top: 4px; right: 4px; width: calc(100vw - 8px); }
+      .tabs { gap: 6px; padding: 4px; }
+      .tab { padding: 8px 0; }
+      .prediction-row { gap: 8px; }
+    }
+    /* ── RESPONSIVE: landscape phones ── */
+    @media (max-height: 500px) {
+      .widget { max-height: calc(100dvh - 10px); top: 5px; }
+      .prediction-area { padding: 10px 12px; margin: 8px 0; }
+      .trend-card { margin: 8px 0; padding: 12px; }
+      .info-card { margin-bottom: 10px; }
+    }
+    /* ── RESPONSIVE: tablets & desktops ── */
+    @media (min-width: 768px) {
+      .widget { top: 20px; right: 20px; }
+    }
+
+  
+    @keyframes earlyFlash {
+      0%   { transform: scale(1.06); box-shadow: 0 0 24px rgba(255,220,60,0.55); }
+      60%  { transform: scale(1.01); box-shadow: 0 0 10px rgba(255,220,60,0.2); }
+      100% { transform: scale(1);    box-shadow: none; }
     }
   </style>
 </head>
 <body>
 
-<iframe class="game-iframe" src="https://hgnice.club/#/register?invitationCode=287821529002"></iframe>
+<iframe class="game-iframe" src="https://www.tigrozone.com/#/register?invitationCode=68317334654"></iframe>
 
 <div class="widget" id="widget">
   <div class="widget-header" id="dragHandle">
@@ -385,9 +451,25 @@
         <button class="tab" data-tab="history">📜 HISTORY</button>
       </div>
       <div class="panel active" id="predictTab">
+        <!-- Bulk history load progress — hidden once done -->
+        <div id="bulkLoadBar" style="display:none; margin-bottom:10px; padding:8px 12px; border-radius:12px; background:rgba(255,180,80,0.07); border:1px solid rgba(255,180,80,0.18);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span id="bulkLoadText" style="font-size:9.5px; font-weight:700; letter-spacing:0.6px; color:rgba(255,200,140,0.65);">📥 Loading missed rounds…</span>
+            <span id="bulkLoadPct" style="font-size:9.5px; font-weight:700; color:rgba(255,200,140,0.45);">0%</span>
+          </div>
+          <div style="height:4px; background:rgba(255,255,255,0.07); border-radius:4px; overflow:hidden;">
+            <div id="bulkLoadFill" style="height:100%; background:linear-gradient(90deg,#ff8866,#ffcc55); border-radius:4px; width:0%; transition:width 0.25s ease;"></div>
+          </div>
+        </div>
         <div class="info-card">
-          <span class="future-period" id="futurePeriodDisplay">----</span>
+          <div class="future-period-wrap">
+            <span class="future-period-label">Period</span>
+            <span class="future-period" id="futurePeriodDisplay">----</span>
+          </div>
           <span class="timer-value" id="roundTimerDisplay">--s</span>
+        </div>
+        <div id="streakAlert" style="display:none; margin-bottom:10px; padding:10px 14px; border-radius:14px; background:linear-gradient(135deg,rgba(255,60,60,0.22),rgba(255,140,0,0.18)); border:1.5px solid rgba(255,100,60,0.55); text-align:center;">
+          <div id="streakAlertText" style="font-size:0.92em; font-weight:700; letter-spacing:0.3px; color:#ffaa66;"></div>
         </div>
         <div class="trend-card">
           <div class="trend-name" id="trendName">📊 PATTERN MATCHING</div>
@@ -403,6 +485,7 @@
           <span>📊 CONF: <b id="confStat">0%</b></span>
         </div>
       </div>
+      </div>
       <div class="panel" id="liveTab">
         <div class="info-note">
           🔗 FIXED API · Auto‑sync at round end (0s & 30s) &nbsp;|&nbsp; TOTAL ROUNDS: <b id="liveTotalCount">0</b>
@@ -415,10 +498,13 @@
         </div>
       </div>
       <div class="panel" id="historyTab">
-        <div class="info-note" id="historyStats">📜 PREDICTION HISTORY — ✅ correct, ❌ incorrect</div>
+        <div style="display:flex; align-items:center; gap:8px; margin: 12px 8px 0;">
+          <div class="info-note" id="historyStats" style="flex:1; margin:0;">📜 PREDICTION HISTORY — ✅ correct, ❌ incorrect</div>
+          <button id="resetHistoryBtn" title="Reset history" style="flex-shrink:0; background:rgba(255,255,255,0.06); border:1px solid rgba(255,180,120,0.18); border-radius:40px; color:rgba(255,200,160,0.55); font-size:11px; font-weight:600; padding:6px 13px; cursor:pointer; transition:0.2s; letter-spacing:0.3px; white-space:nowrap;">↺ Reset</button>
+        </div>
         <div class="history-table-wrap">
           <table class="history-table">
-            <thead><tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>ACTUAL</th><th>MATCH</th></tr></thead>
+            <thead><tr><th>PERIOD</th><th>PREDICTED</th><th>NUMBER</th><th>MATCH</th></tr></thead>
             <tbody id="historyTableBody"><tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr></tbody>
           </table>
         </div>
@@ -429,7 +515,11 @@
 
 <script>
 (function(){
-  const FIXED_API_URL = "https://bdwingohack.vercel.app/api/wingo";
+  // Safe DOM helpers — never throw on missing elements
+  function domSet(id, prop, val) { const e = document.getElementById(id); if (e) e[prop] = val; }
+  function domStyle(id, prop, val) { const e = document.getElementById(id); if (e) e.style[prop] = val; }
+
+
   let liveHistory = [];
   let predictionHistory = [];
   let roundSyncActive = false;
@@ -439,30 +529,46 @@
   let lastPatternName = "pattern detection";
   let lastConfidence = 0.7;
   let lastTriggeredSecond = -1;
+  let lastTrendName = '';
+  let lastTrendDir = '';
+  let lastStreakLen = 0;
+  let lastAlert = '';
+  let lastMomentum = 'neutral';
+  let lastPatternType = '';
+  let prngCycleCache = { count: -1, result: null };
 
-  // Drag logic
+  // Drag logic — pointer capture + transform (no layout reflow)
   const widget = document.getElementById('widget');
   const dragHandle = document.getElementById('dragHandle');
-  let drag = false, startX, startY, startLeft, startTop;
-  dragHandle.addEventListener('mousedown', (e) => {
+  let dragActive = false, startX, startY, baseX = 0, baseY = 0;
+
+  dragHandle.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button')) return;
-    drag = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    const rect = widget.getBoundingClientRect();
-    startLeft = rect.left;
-    startTop = rect.top;
-    widget.style.position = 'fixed';
-    widget.style.right = 'auto';
+    dragActive = true;
+    startX = e.clientX - baseX;
+    startY = e.clientY - baseY;
+    dragHandle.setPointerCapture(e.pointerId);
+    widget.style.transition = 'none';
     e.preventDefault();
   });
-  document.addEventListener('mousemove', (e) => {
-    if (!drag) return;
-    widget.style.left = `${startLeft + (e.clientX - startX)}px`;
-    widget.style.top = `${startTop + (e.clientY - startY)}px`;
-    widget.style.right = 'auto';
+
+  dragHandle.addEventListener('pointermove', (e) => {
+    if (!dragActive) return;
+    baseX = e.clientX - startX;
+    baseY = e.clientY - startY;
+    widget.style.transform = `translate(${baseX}px, ${baseY}px)`;
   });
-  document.addEventListener('mouseup', () => { drag = false; });
+
+  function endDrag() {
+    if (!dragActive) return;
+    dragActive = false;
+    widget.style.transition = 'box-shadow 0.3s ease, border 0.3s ease';
+  }
+
+  dragHandle.addEventListener('pointerup', endDrag);
+  dragHandle.addEventListener('pointercancel', endDrag);
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
 
   function getResultFromNumber(num) { return (num >= 5 && num <= 9) ? 'BIG' : 'SMALL'; }
   function getDotHtml(num) {
@@ -498,7 +604,7 @@
     renderLiveTable();
     renderHistoryTable();
     updateHistoryStats();
-    if (liveHistory.length > 0) generateStablePrediction();
+    if (liveHistory.length > 0) { generateStablePrediction(); updateUIWithCurrentPrediction(); }
     else updateUIDefault();
   }
   function saveLiveHistory() { localStorage.setItem('wingo_pattern_v5', JSON.stringify(liveHistory.slice(-500))); }
@@ -510,40 +616,38 @@
     const tbody = document.getElementById('liveTableBody');
     if (!liveHistory.length) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:36px;">✨ Waiting for first sync...✨</td></tr>';
-      document.getElementById('liveTotalCount').innerText = '0';
+      domSet('liveTotalCount','innerText','0');
       return;
     }
     let html = '';
-    liveHistory.slice(0, 50).forEach(row => {
+    liveHistory.slice(0, 100).forEach(row => {
       const numVal = row.number;
       const numberClass = getNumberClass(numVal);
       const dotMarkup = getDotHtml(numVal);
       const resultClass = (row.result === 'BIG') ? 'big-result' : 'small-result';
       html += `<tr>
-        <td style="font-family:monospace;">${row.period}</td>
+        <td style="font-family:monospace; font-size:11px;" title="${row.period}">${String(row.period).slice(-6)}</td>
         <td class="${numberClass}"><strong>${numVal}</strong></td>
         <td class="${resultClass}" style="font-weight:700;">${row.result}</td>
         <td class="dot-cell">${dotMarkup}</td>
       </tr>`;
     });
     tbody.innerHTML = html;
-    document.getElementById('liveTotalCount').innerText = liveHistory.length;
+    domSet('liveTotalCount','innerText',liveHistory.length);
   }
   function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
     if (!predictionHistory.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:36px;">No predictions yet</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:36px;">No predictions yet</td></tr>';
       return;
     }
     let html = '';
     predictionHistory.slice(0, 50).forEach(p => {
       const correctMark = p.correct ? '✅' : '❌';
-      const actualClass = p.actualResult ? (p.actualResult === 'BIG' ? 'big-result' : 'small-result') : '';
       html += `<tr>
-        <td style="font-family:monospace;">${p.period}</td>
+        <td style="font-family:monospace; font-size:11px;" title="${p.period}">${String(p.period).slice(-6)}</td>
         <td class="${p.predictedResult === 'BIG' ? 'big-result' : 'small-result'}">${p.predictedResult}</td>
         <td class="${getNumberClass(p.predictedNumber)}"><strong>${p.predictedNumber}</strong></td>
-        <td class="${actualClass}">${p.actualResult || 'pending'} ${p.actualNumber !== undefined ? p.actualNumber : ''}</td>
         <td class="match-cell">${correctMark}</td>
       </tr>`;
     });
@@ -557,11 +661,14 @@
     statsDiv.innerHTML = `📜 PREDICTION HISTORY — ✅ ${correct}  |  ❌ ${total-correct}  |  Total: ${total}`;
   }
   function getNextPeriod() {
+    // Prefer the authoritative server value whenever available
+    if (gameStatePeriod && gameStatePeriod.length > 4) return gameStatePeriod;
     if (liveHistory.length === 0) return "----";
+    // Fallback: liveHistory = completed rounds; max+1 = current running round
     let maxPeriod = liveHistory[0].period, maxNum = -1;
     for (let h of liveHistory) {
-      let match = h.period.match(/\d+$/);
-      if (match) { let num = parseInt(match[0], 10); if (num > maxNum) { maxNum = num; maxPeriod = h.period; } }
+      let m = h.period.match(/\d+$/);
+      if (m) { let n = parseInt(m[0], 10); if (n > maxNum) { maxNum = n; maxPeriod = h.period; } }
     }
     const match = maxPeriod.match(/\d+$/);
     if (match) {
@@ -572,75 +679,810 @@
     return maxPeriod + "+1";
   }
   function convertToAB(history) { return history.map(h => h.result === 'SMALL' ? 'A' : 'B'); }
-  const patterns = [
-    { name: "1A1B (ABAB)", regex: /^(AB)+$/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.77 },
-    { name: "2A2B (AABB)", regex: /^(AABB)+$/, next: (seq) => { let last = seq.slice(-2).join(''); if (last === 'AA') return 'B'; if (last === 'BB') return 'A'; return 'A'; }, weight: 0.73 },
-    { name: "3A3B (AAABBB)", regex: /^(AAABBB)+$/, next: (seq) => { let lastThree = seq.slice(-3).join(''); if (lastThree === 'AAA') return 'B'; if (lastThree === 'BBB') return 'A'; return 'A'; }, weight: 0.72 },
-    { name: "4A4B pattern", regex: /^(AAAABBBB)+$/, next: (seq) => seq.slice(-4).join('') === 'AAAA' ? 'B' : 'A', weight: 0.73 },
-    { name: "1A2B oscillator", regex: /^(ABB)+$/, next: (seq) => seq.slice(-3).join('') === 'ABB' ? 'A' : 'B', weight: 0.71 },
-    { name: "2A1B (AAB)", regex: /^(AAB)+$/, next: (seq) => seq.slice(-2).join('') === 'AA' ? 'B' : 'A', weight: 0.71 },
-    { name: "Long streak A (≥5)", regex: /^A{5,}$/, next: () => 'B', weight: 0.87 },
-    { name: "Long streak B (≥5)", regex: /^B{5,}$/, next: () => 'A', weight: 0.87 },
-    { name: "Mirror classic", regex: /^ABABABAB/, next: (seq) => seq[seq.length-1] === 'A' ? 'B' : 'A', weight: 0.76 }
+
+  // =====================================================
+  // PATTERN LIBRARY — A = SMALL, B = BIG
+  // =====================================================
+  const CYCLE_PATTERNS = [
+    { id:'1A1B',   name:'Single Alternating (S→B)',    cycle:['A','B'],                                    weight:0.82 },
+    { id:'2A2B',   name:'Two-in-One (SS→BB)',           cycle:['A','A','B','B'],                            weight:0.83 },
+    { id:'3A3B',   name:'Three-in-One (SSS→BBB)',       cycle:['A','A','A','B','B','B'],                    weight:0.82 },
+    { id:'4A4B',   name:'Quadra Cycle (SSSS→BBBB)',     cycle:['A','A','A','A','B','B','B','B'],            weight:0.81 },
+    { id:'5A5B',   name:'Five-Streak Cycle',            cycle:['A','A','A','A','A','B','B','B','B','B'],    weight:0.80 },
+    { id:'1A2B',   name:'1S+2B',                        cycle:['A','B','B'],                                weight:0.74 },
+    { id:'2A1B',   name:'2S+1B',                        cycle:['A','A','B'],                                weight:0.74 },
+    { id:'1A3B',   name:'1S+3B',                        cycle:['A','B','B','B'],                            weight:0.73 },
+    { id:'3A1B',   name:'3S+1B',                        cycle:['A','A','A','B'],                            weight:0.74 },
+    { id:'3A2B',   name:'3S+2B',                        cycle:['A','A','A','B','B'],                        weight:0.75 },
+    { id:'4A1B',   name:'4S+1B',                        cycle:['A','A','A','A','B'],                        weight:0.74 },
+    { id:'4A2B',   name:'4S+2B',                        cycle:['A','A','A','A','B','B'],                    weight:0.75 },
+    { id:'4A3B',   name:'4S+3B',                        cycle:['A','A','A','A','B','B','B'],                weight:0.75 },
+    { id:'1B1A',   name:'Single Alternating (B→S)',     cycle:['B','A'],                                    weight:0.82 },
+    { id:'2B2A',   name:'Two-in-One (BB→SS)',           cycle:['B','B','A','A'],                            weight:0.83 },
+    { id:'3B3A',   name:'Three-in-One (BBB→SSS)',       cycle:['B','B','B','A','A','A'],                    weight:0.82 },
+    { id:'4B4A',   name:'Quadra Cycle (BBBB→SSSS)',     cycle:['B','B','B','B','A','A','A','A'],            weight:0.81 },
+    { id:'5B5A',   name:'Five-Streak Mirror Cycle',     cycle:['B','B','B','B','B','A','A','A','A','A'],    weight:0.80 },
+    { id:'1B2A',   name:'1B+2S',                        cycle:['B','A','A'],                                weight:0.74 },
+    { id:'2B1A',   name:'2B+1S',                        cycle:['B','B','A'],                                weight:0.74 },
+    { id:'1B3A',   name:'1B+3S',                        cycle:['B','A','A','A'],                            weight:0.73 },
+    { id:'3B1A',   name:'3B+1S',                        cycle:['B','B','B','A'],                            weight:0.74 },
+    { id:'3B2A',   name:'3B+2S',                        cycle:['B','B','B','A','A'],                        weight:0.75 },
+    { id:'4B1A',   name:'4B+1S',                        cycle:['B','B','B','B','A'],                        weight:0.74 },
+    { id:'chain_bs', name:'Cycle Chain (BB→BBB)',       cycle:['B','B','A','A','A'],                        weight:0.73 },
+    { id:'chain_sb', name:'Cycle Chain (SS→SSS)',       cycle:['A','A','B','B','B'],                        weight:0.73 },
+    { id:'comp2r',   name:'Compression 2+2 (BB→SS)',   cycle:['B','B','A','A'],                            weight:0.78 },
+    { id:'comp3r',   name:'Compression 3+3 (BBB→SSS)', cycle:['B','B','B','A','A','A'],                    weight:0.78 },
   ];
-  function detectPattern(abSeq) {
-    if (abSeq.length < 2) return null;
-    let testSeq = abSeq.join('');
-    for (let p of patterns) {
-      if (p.regex.test(testSeq) || (testSeq.length > 12 && p.regex.test(testSeq.slice(-12)))) {
-        let next = p.next(abSeq);
-        return { pattern: p.name, next, confidence: p.weight };
+
+  // =====================================================
+  // ADAPTIVE CONFIDENCE by streak length
+  // Short(1-3) → Medium(4-7) → Long(8-12) → Extreme(13+)
+  // =====================================================
+  function getAdaptiveStreakConf(len) {
+    if (len >= 14) return 0.96;
+    if (len >= 13) return 0.95;
+    if (len >= 10) return 0.93;
+    if (len >= 8)  return 0.91;
+    if (len >= 7)  return 0.89;
+    if (len >= 6)  return 0.86;
+    if (len >= 5)  return 0.83;
+    if (len >= 4)  return 0.79;
+    if (len >= 3)  return 0.73;
+    return 0.68;
+  }
+
+  function getStreakLabel(len) {
+    if (len === 1) return 'Single';
+    if (len === 2) return 'Double';
+    if (len === 3) return 'Triple';
+    if (len === 4) return 'Quadra';
+    if (len === 5) return 'Five Streak';
+    if (len === 6) return 'Six Streak';
+    if (len === 7) return 'Seven Streak';
+    if (len >= 13) return 'Extreme Streak';
+    if (len >= 8)  return 'Long Streak';
+    return `${len}-Streak`;
+  }
+
+  // =====================================================
+  // WEIGHTED PROBABILITY — mean reversion on imbalance
+  // =====================================================
+  function getWeightedHistoryBias(seq) {
+    if (seq.length < 10) return { pred: null, weight: 0 };
+    const recent20 = seq.slice(0, Math.min(seq.length, 20));
+    const aCount = recent20.filter(v => v === 'A').length;
+    const bCount = recent20.length - aCount;
+    const ratio = Math.max(aCount, bCount) / recent20.length;
+    if (ratio >= 0.70) {
+      const dominant = aCount > bCount ? 'A' : 'B';
+      return { pred: dominant === 'A' ? 'B' : 'A', weight: (ratio - 0.5) * 2.0 };
+    }
+    return { pred: null, weight: 0 };
+  }
+
+  // =====================================================
+  // COMPRESSION DETECTOR — uniform alternating run lengths
+  // e.g. BBSSBB = runs [2,2,2] → compression rhythm
+  // =====================================================
+  function detectCompression(runs) {
+    if (runs.length < 4) return null;
+    const r4 = runs.slice(0, 4);
+    const lens = r4.map(r => r.len);
+    const avg = lens.reduce((a, b) => a + b, 0) / lens.length;
+    if (!lens.every(l => Math.abs(l - avg) <= 1) || avg < 1.5) return null;
+    const alternating = r4.every((r, i) => i === 0 || r.val !== r4[i - 1].val);
+    if (!alternating) return null;
+    const cur = runs[0];
+    const avgR = Math.round(avg);
+    if (cur.len < avgR) {
+      return { name: `Compression ${avgR}+${avgR} (in-cluster)`, prediction: cur.val, confidence: 0.76, trending: `Cluster of ${avgR} in progress — continue`, type: 'COMPRESSION' };
+    }
+    return { name: `Compression → Expansion Switch`, prediction: cur.val === 'A' ? 'B' : 'A', confidence: 0.78, trending: `${avgR}-block complete — switch sides`, type: 'COMPRESSION_SWITCH' };
+  }
+
+  // =====================================================
+  // EXPANSION DETECTOR — pure B→S→B→S alternation
+  // =====================================================
+  function detectExpansion(runs) {
+    if (runs.length < 5) return null;
+    const r5 = runs.slice(0, 5);
+    if (r5.every(r => r.len === 1) && r5.every((r, i) => i === 0 || r.val !== r5[i - 1].val)) {
+      return { name: 'Expansion (B→S→B→S)', prediction: runs[0].val === 'A' ? 'B' : 'A', confidence: 0.81, trending: 'Strict alternation — Expansion pattern, next flip', type: 'EXPANSION' };
+    }
+    return null;
+  }
+
+  // =====================================================
+  // CYCLE CHAIN — escalating or descending run lengths
+  // e.g. BB→BBB = cycle chain (Double → Triple → Reversal)
+  // =====================================================
+  function detectCycleChain(runs) {
+    if (runs.length < 3) return null;
+    const [r0, r1, r2] = runs;
+    if (r0.val !== r1.val && r1.val !== r2.val) {
+      // Escalating chain: lengths grow
+      if (r2.len <= r1.len && r1.len <= r0.len) {
+        const opp = r0.val === 'A' ? 'B' : 'A';
+        return { name: `Cycle Chain (${r2.len}→${r1.len}→${r0.len})`, prediction: opp, confidence: 0.75, trending: `Escalating blocks — reversal expected`, type: 'CHAIN' };
+      }
+      // Mirror Opposite: descending after long streak
+      if (r0.len < r1.len && r1.len < r2.len) {
+        const opp = r0.val === 'A' ? 'B' : 'A';
+        return { name: `Mirror Opposite (${r2.len}→${r1.len}→${r0.len})`, prediction: opp, confidence: 0.74, trending: `Mirror rebound — ${r2.len}-streak reflected`, type: 'MIRROR' };
       }
     }
-    let recent = abSeq.slice(0,6);
-    let aCount = recent.filter(c => c === 'A').length;
-    let bCount = recent.length - aCount;
-    let next = aCount > bCount ? 'B' : 'A';
-    let conf = Math.max(aCount, bCount) / recent.length;
-    return { pattern: "Weighted recency", next, confidence: Math.min(0.68, conf + 0.1) };
+    return null;
   }
+
+  // =====================================================
+  // EXTENDED PATTERN LIBRARY — per RNG Analyzer spec
+  // =====================================================
+
+  // LADDER — run lengths ascending or descending
+  function detectLadder(runs) {
+    if (runs.length < 4) return null;
+    const lens = runs.slice(0, 5).map(r => r.len);
+    let asc = true, desc = true;
+    for (let i = 1; i < lens.length; i++) {
+      if (lens[i] >= lens[i-1]) asc = false;
+      if (lens[i] <= lens[i-1]) desc = false;
+    }
+    const cur = runs[0], opp = cur.val === 'A' ? 'B' : 'A';
+    if (asc) return { name:`Ladder ↓ (${lens.slice(0,4).join('→')})`, prediction:opp, confidence:0.76, trending:`Ladder collapses — reversal at base`, type:'LADDER', family:'Rhythm' };
+    if (desc) return { name:`Ladder ↑ (${lens.slice(0,4).join('→')})`, prediction:cur.val, confidence:0.73, trending:`Ladder builds — momentum continues`, type:'LADDER', family:'Rhythm' };
+    return null;
+  }
+
+  // PYRAMID — run lengths peak then descend (or Diamond: dip then rise)
+  function detectPyramid(runs) {
+    if (runs.length < 5) return null;
+    const lens = runs.slice(0, 5).map(r => r.len);
+    const cur = runs[0], opp = cur.val === 'A' ? 'B' : 'A';
+    // Pyramid: ascend then descend
+    if (lens[0]<lens[1] && lens[1]<lens[2] && lens[2]>lens[3] && lens[3]>lens[4])
+      return { name:`Pyramid (${lens.join('→')})`, prediction:opp, confidence:0.77, trending:`Pyramid — base collapse, reversal incoming`, type:'PYRAMID', family:'Rhythm' };
+    // Diamond: descend then ascend
+    if (lens[0]>lens[1] && lens[1]>lens[2] && lens[2]<lens[3] && lens[3]<lens[4])
+      return { name:`Diamond (${lens.join('→')})`, prediction:cur.val, confidence:0.74, trending:`Diamond contraction — rebound expected`, type:'DIAMOND', family:'Rhythm' };
+    return null;
+  }
+
+  // HOT/COLD BIAS — heavy frequency imbalance triggers mean reversion
+  function detectHotColdBias(seq) {
+    if (seq.length < 30) return null;
+    const short = seq.slice(0, 30), long = seq.slice(0, Math.min(seq.length, 100));
+    const sB = short.filter(v=>v==='B').length / short.length;
+    const lB = long.filter(v=>v==='B').length / long.length;
+    const sBias = Math.abs(sB - 0.5), lBias = Math.abs(lB - 0.5);
+    if (sBias >= 0.20 && lBias >= 0.12) {
+      const hot = sB > 0.5 ? 'B' : 'A', cold = hot==='B'?'A':'B';
+      const hotL = hot==='B'?'BIG':'SMALL', coldL = cold==='B'?'BIG':'SMALL';
+      const conf = Math.min(0.82, 0.60 + sBias * 0.80);
+      return { name:`Hot/Cold (${hotL} ${Math.round(sB*100)}%)`, prediction:cold, confidence:conf, trending:`${hotL} dominant — mean reversion to ${coldL}`, type:'HOT_COLD', family:'Probability' };
+    }
+    return null;
+  }
+
+  // GAP ANALYSIS — rounds since we last saw the opposite result
+  function detectGapPattern(seq) {
+    if (seq.length < 10) return null;
+    const cur = seq[0], opp = cur==='A'?'B':'A';
+    let gap = 0;
+    for (let i = 0; i < seq.length; i++) { if (seq[i]===opp) break; gap++; }
+    if (gap >= 6) {
+      const label = opp==='B'?'BIG':'SMALL';
+      const conf = Math.min(0.88, 0.65 + gap * 0.025);
+      return { name:`Gap Alert (${gap}-round gap)`, prediction:opp, confidence:conf, trending:`${gap} rounds without ${label} — overdue`, type:'GAP', family:'Probability' };
+    }
+    return null;
+  }
+
+  // THRESHOLD TRIGGER — cumulative balance crosses tipping point
+  function detectThresholdTrigger(seq) {
+    if (seq.length < 20) return null;
+    let balance = 0;
+    const win = seq.slice(0, Math.min(seq.length, 50));
+    for (const v of win) balance += v==='B' ? 1 : -1;
+    if (Math.abs(balance) >= 8) {
+      const dom = balance>0?'B':'A', under = dom==='B'?'A':'B';
+      const domL = dom==='B'?'BIG':'SMALL', underL = under==='B'?'BIG':'SMALL';
+      const conf = Math.min(0.83, 0.65 + Math.abs(balance) * 0.015);
+      return { name:`Threshold (${domL} +${Math.abs(balance)})`, prediction:under, confidence:conf, trending:`${domL} overloaded (${Math.abs(balance)}) → ${underL} correction`, type:'THRESHOLD', family:'Probability' };
+    }
+    return null;
+  }
+
+  // MODULO CYCLE — every N rounds the sequence repeats (PRNG fingerprint)
+  function detectModuloCycle(seq) {
+    if (seq.length < 20) return null;
+    let best = { period:0, score:0, nextPred:null };
+    for (let p = 4; p <= 14; p++) {
+      if (seq.length < p * 3) continue;
+      let m = 0, t = 0;
+      for (let i = 0; i < seq.length - p; i++) { if (seq[i]===seq[i+p]) m++; t++; }
+      const score = m / t;
+      if (score > 0.72 && score > best.score) best = { period:p, score, nextPred:seq[p] };
+    }
+    if (best.period > 0 && best.nextPred) {
+      const label = best.nextPred==='B'?'BIG':'SMALL';
+      const conf = Math.min(0.84, 0.55 + (best.score - 0.72) * 2.0);
+      return { name:`Modulo Cycle (p=${best.period}, ${Math.round(best.score*100)}%)`, prediction:best.nextPred, confidence:conf, trending:`PRNG repeats every ${best.period} rounds → ${label}`, type:'MODULO', family:'Meta-Pattern' };
+    }
+    return null;
+  }
+
+  // ECHO PATTERN — recent 6-round block matches a block from N rounds ago
+  function detectEchoPattern(seq) {
+    if (seq.length < 16) return null;
+    const checkLen = 6;
+    let bestOffset = 0, bestMatches = 0;
+    for (let offset = checkLen+1; offset <= Math.min(seq.length-checkLen, 40); offset++) {
+      let m = 0;
+      for (let i = 0; i < checkLen; i++) { if (seq[i]===seq[offset+i]) m++; }
+      if (m > bestMatches) { bestMatches = m; bestOffset = offset; }
+    }
+    if (bestMatches >= 5 && bestOffset > 0) {
+      const echoPred = seq[bestOffset - 1];
+      const label = echoPred==='B'?'BIG':'SMALL';
+      const conf = Math.min(0.80, 0.58 + (bestMatches-5)*0.05);
+      return { name:`Echo (${bestMatches}/6 @-${bestOffset})`, prediction:echoPred, confidence:conf, trending:`Sequence echoes from −${bestOffset} rounds → ${label}`, type:'ECHO', family:'Meta-Pattern' };
+    }
+    return null;
+  }
+
+  // SNAKE RUN — alternating sides with non-uniform varying run lengths
+  function detectSnakeRun(runs) {
+    if (runs.length < 6) return null;
+    const r6 = runs.slice(0, 6);
+    const alternating = r6.every((r,i) => i===0 || r.val!==r6[i-1].val);
+    if (!alternating) return null;
+    const lens = r6.map(r=>r.len);
+    const mx = Math.max(...lens), mn = Math.min(...lens);
+    if (mx===mn) return null; // compression, not snake
+    if (mx >= 2 && mx <= 6) {
+      const cur = runs[0], opp = cur.val==='A'?'B':'A';
+      return { name:`Snake Run (${lens.join('→')})`, prediction:opp, confidence:0.72, trending:`Zigzag varying lengths — Snake Run, next flip`, type:'SNAKE', family:'Alternation' };
+    }
+    return null;
+  }
+
+  // FRACTAL CHAIN — micro-pattern (4) repeats inside macro-window (12)
+  function detectFractalChain(seq) {
+    if (seq.length < 30) return null;
+    const micro = seq.slice(0,4).join('');
+    const macro = seq.slice(0,16).join('');
+    let count = 0;
+    for (let i = 0; i <= macro.length - micro.length; i++)
+      if (macro.slice(i, i+micro.length)===micro) count++;
+    if (count >= 2) {
+      const cont = seq[0];
+      const label = cont==='B'?'BIG':'SMALL';
+      return { name:`Fractal Chain (${micro}×${count})`, prediction:cont, confidence:0.70, trending:`Self-similar micro-pattern ×${count} — fractal continuation → ${label}`, type:'FRACTAL', family:'Meta-Pattern' };
+    }
+    return null;
+  }
+
+  // PRNG CYCLE DETECTION — long-term cycle search on full 500-round history
+  function detectPRNGCycle(seq) {
+    if (seq.length < 50) return null;
+    const check = seq.slice(0, Math.min(seq.length, 500));
+    let best = { len:0, score:0, nextPred:null };
+    for (let cycleLen = 10; cycleLen <= 50; cycleLen++) {
+      if (check.length < cycleLen * 3) continue;
+      const pattern = check.slice(check.length - cycleLen);
+      let m = 0, t = 0;
+      const cycles = Math.floor(check.length / cycleLen);
+      for (let c = 0; c < cycles - 1; c++) {
+        for (let i = 0; i < cycleLen; i++) {
+          if (check[c*cycleLen+i]===pattern[i%cycleLen]) m++;
+          t++;
+        }
+      }
+      const score = t > 0 ? m/t : 0;
+      if (score > 0.70 && score > best.score) {
+        const phase = check.length % cycleLen;
+        best = { len:cycleLen, score, nextPred:pattern[phase] };
+      }
+    }
+    if (best.len > 0 && best.nextPred) {
+      const label = best.nextPred==='B'?'BIG':'SMALL';
+      const conf = Math.min(0.86, 0.58 + (best.score - 0.70) * 2.0);
+      return { name:`PRNG Cycle (len=${best.len}, ${Math.round(best.score*100)}%)`, prediction:best.nextPred, confidence:conf, trending:`Weak PRNG cycle (${best.len}-round repeat) → ${label}`, type:'PRNG_CYCLE', family:'Cycle Detection' };
+    }
+    return null;
+  }
+
+  // =====================================================
+  // WAVEFORM — alternating runs forming a sinusoidal wave
+  // =====================================================
+  function detectWaveform(runs) {
+    if (runs.length < 6) return null;
+    const r6 = runs.slice(0, 6);
+    if (!r6.every((r,i) => i===0 || r.val !== r6[i-1].val)) return null;
+    const lens = r6.map(r => r.len);
+    const diff = lens.slice(1).map((l,i) => l - lens[i]);
+    let peaks = 0;
+    for (let i = 1; i < diff.length; i++) if (diff[i] * diff[i-1] < 0) peaks++;
+    if (peaks >= 2) {
+      const cur = runs[0], opp = cur.val==='A'?'B':'A';
+      const pred = lens[0] > lens[1] ? cur.val : opp;
+      return { name:`Waveform (${lens.join('→')})`, prediction:pred, confidence:0.73, trending:`Wave rhythm detected`, type:'WAVEFORM', family:'Rhythm' };
+    }
+    return null;
+  }
+
+  // =====================================================
+  // SPIRAL — progressively tightening or loosening runs
+  // =====================================================
+  function detectSpiral(runs) {
+    if (runs.length < 5) return null;
+    const r5 = runs.slice(0, 5);
+    if (!r5.every((r,i) => i===0 || r.val !== r5[i-1].val)) return null;
+    const lens = r5.map(r => r.len);
+    const tight = lens.every((l,i) => i===0 || l <= lens[i-1]) && lens[0] !== lens[4];
+    const loose = lens.every((l,i) => i===0 || l >= lens[i-1]) && lens[0] !== lens[4];
+    const cur = runs[0], opp = cur.val==='A'?'B':'A';
+    if (tight) return { name:`Spiral ↓ (${lens.join('→')})`, prediction:opp, confidence:0.74, trending:`Tightening spiral — reversal at core`, type:'SPIRAL', family:'Rhythm' };
+    if (loose) return { name:`Spiral ↑ (${lens.join('→')})`, prediction:cur.val, confidence:0.72, trending:`Loosening spiral — expansion continues`, type:'SPIRAL', family:'Rhythm' };
+    return null;
+  }
+
+  // =====================================================
+  // PARITY CHAIN — even/odd alternation of game numbers
+  // =====================================================
+  function detectParityChain(history) {
+    if (history.length < 10) return null;
+    const slice = history.slice(0, 20);
+    const parities = slice.map(h => h.number % 2 === 0 ? 'E' : 'O');
+    let altCount = 0;
+    for (let i = 1; i < parities.length; i++) if (parities[i] !== parities[i-1]) altCount++;
+    const ratio = altCount / (parities.length - 1);
+    if (ratio >= 0.75) {
+      const nextP = parities[0] === 'E' ? 'O' : 'E';
+      const bigOdd  = slice.filter(h => h.result==='BIG'   && h.number%2!==0).length;
+      const bigEven = slice.filter(h => h.result==='BIG'   && h.number%2===0).length;
+      const smlOdd  = slice.filter(h => h.result==='SMALL' && h.number%2!==0).length;
+      const smlEven = slice.filter(h => h.result==='SMALL' && h.number%2===0).length;
+      const pred = nextP==='O' ? (bigOdd>smlOdd?'B':'A') : (bigEven>smlEven?'B':'A');
+      return { name:`Parity Chain (${Math.round(ratio*100)}%)`, prediction:pred, confidence:Math.min(0.78, 0.58+ratio*0.25), trending:`Even/odd alternating — parity chain active`, type:'PARITY', family:'Alternation' };
+    }
+    return null;
+  }
+
+  // =====================================================
+  // CACHED PRNG CYCLE — only recomputes when new data arrives
+  // =====================================================
+  function detectPRNGCycleCached() {
+    if (liveHistory.length === prngCycleCache.count) return prngCycleCache.result;
+    const seq = convertToAB(liveHistory);
+    const result = detectPRNGCycle(seq);
+    prngCycleCache = { count: liveHistory.length, result };
+    return result;
+  }
+
+  // =====================================================
+  // HUMAN-FRIENDLY ALERT ENGINE
+  // =====================================================
+  function getPatternAlert(type, ctx) {
+    const { streakLen, streakSide, prediction } = ctx;
+    const flip = streakSide === 'BIG' ? 'SMALL' : 'BIG';
+    const pred = prediction === 'B' ? 'BIG' : 'SMALL';
+    switch (type) {
+      case 'EXTREME':     return `This run has gone on too long. It usually flips soon — ${flip} is almost certain now.`;
+      case 'LONG':        return `That's a long run. The longer it goes, the more likely a flip becomes. Watch for ${flip}.`;
+      case 'SEVEN':       return `Seven in a row. Extended streaks like this usually break. Be ready to flip to ${flip}.`;
+      case 'SIX':         return `Six straight. We're in flip territory — ${flip} expected.`;
+      case 'FIVE':        return `Five in a row is a strong signal. A flip to ${flip} is likely coming.`;
+      case 'QUADRA_STREAK': return `Four in a row. The flip signal is building. Watch for ${flip}.`;
+      case 'TRIPLE':      return `Three in a row. Expect ${flip} to show up soon.`;
+      case 'DOUBLE':      return `A pair came through. The mirror ${flip} is likely next.`;
+      case 'SINGLE':
+      case 'EXPANSION':   return `It's flipping back and forth. Expect the opposite next — ${pred}.`;
+      case 'TWO_IN_ONE':  return `Results are coming in pairs. The pattern usually holds — stay with it.`;
+      case 'THREE_IN_ONE': return `Triple-block cycle is running strong. The rhythm is clear.`;
+      case 'QUADRA':      return `Four-block rhythm detected. Trust the cycle.`;
+      case 'COMPRESSION': return `Outcomes are packed tight. Expect repeats close together.`;
+      case 'COMPRESSION_SWITCH': return `The tight cluster just ended. Expect a shift in direction now.`;
+      case 'CHAIN':       return `The streak just got interrupted. Things might get messy next.`;
+      case 'MIRROR':      return `That streak just snapped. Don't count on it continuing.`;
+      case 'HOT_COLD':    return `One side has been dominating. Expect it to cool off — the other side is overdue.`;
+      case 'GAP':         return `It's been a while since we saw ${flip}. It's overdue — it's coming.`;
+      case 'THRESHOLD':   return `The balance has tipped too far one way. A correction is inevitable now.`;
+      case 'MODULO':      return `There's a repeating cycle hidden in the sequence. Trust the math on this one.`;
+      case 'ECHO':        return `This sequence is echoing what happened before. History may repeat here.`;
+      case 'SNAKE':       return `Zigzagging with no clear lead. The next flip is coming — play it safe.`;
+      case 'FRACTAL':     return `The same mini-pattern keeps showing up. It may continue — watch for the repeat.`;
+      case 'LADDER':      return `Run lengths are stepping like a staircase. Watch the next step closely.`;
+      case 'PYRAMID':     return `The pattern peaked and is winding down. A reversal is near.`;
+      case 'DIAMOND':     return `A tight contraction, now expanding again. Expect a rebound.`;
+      case 'WAVEFORM':    return `Results are riding a wave. Stay with the rhythm — ${pred} is next.`;
+      case 'SPIRAL':      return `The pattern is tightening. When it closes, it flips — watch carefully.`;
+      case 'PARITY':      return `Even/odd parity is alternating consistently. The parity chain is running.`;
+      case 'PRNG_CYCLE':  return `A hidden cycle is running in the background. Trust the math — the RNG is predictable here.`;
+      default:            return `Pattern detected. Signal points to ${pred}.`;
+    }
+  }
+
+  // =====================================================
+  // MOMENTUM BIAS — continuation vs reversal signal
+  // =====================================================
+  function getMomentumBias(seq, streakLen) {
+    if (seq.length < 5) return 'neutral';
+    if (streakLen >= 5) return 'reversal';
+    if (streakLen >= 4) return 'reversal';
+    if (streakLen === 3) return 'watch';
+    // Short streak — check if 4 of last 5 are same side (momentum)
+    const last5 = seq.slice(0, 5);
+    const dom = last5.filter(v => v === seq[0]).length;
+    if (dom >= 4 && streakLen <= 2) return 'momentum';
+    return 'neutral';
+  }
+
+  // Match recent sequence against a repeating cycle.
+  function matchCycle(seq, cycle) {
+    const cLen = cycle.length;
+    if (seq.length < Math.max(cLen, 3)) return { match: false };
+    const checkLen = Math.min(seq.length, cLen * 3);
+    let bestScore = 0, bestNextPred = null;
+    for (let curPhase = 0; curPhase < cLen; curPhase++) {
+      let matches = 0;
+      for (let i = 0; i < checkLen; i++) {
+        const phase = ((curPhase - i) % cLen + cLen) % cLen;
+        if (seq[i] === cycle[phase]) matches++;
+      }
+      const score = matches / checkLen;
+      if (score > bestScore) {
+        bestScore = score;
+        bestNextPred = cycle[(curPhase + 1) % cLen];
+      }
+    }
+    if (bestScore < 0.75) return { match: false };
+    return { match: true, score: bestScore, nextPred: bestNextPred };
+  }
+
+  // Run-length encode sequence (most-recent first)
+  function runLengthEncode(seq) {
+    if (!seq.length) return [];
+    const runs = [];
+    let cur = seq[0], count = 1;
+    for (let i = 1; i < seq.length; i++) {
+      if (seq[i] === cur) count++;
+      else { runs.push({ val: cur, len: count }); cur = seq[i]; count = 1; }
+    }
+    runs.push({ val: cur, len: count });
+    return runs;
+  }
+
+  // =====================================================
+  // FULL TREND DETECTION ENGINE
+  // Covers all streak types + rhythm + chain patterns
+  // =====================================================
+  function detectTrend(seq) {
+    const recent = seq.slice(0, Math.min(seq.length, 100));
+    const runs = runLengthEncode(recent);
+    if (!runs.length) return null;
+
+    const cur = runs[0];
+    const runLens = runs.map(r => r.len);
+    const opp = cur.val === 'A' ? 'B' : 'A';
+    const label = cur.val === 'A' ? 'SMALL' : 'BIG';
+    const oppLabel = opp === 'A' ? 'SMALL' : 'BIG';
+
+    // === EXTREME STREAK (13-14+) — Mirror Opposite Rule ===
+    if (cur.len >= 13) {
+      return { name: `⚡ Extreme ${cur.len}× ${label}`, prediction: opp, confidence: getAdaptiveStreakConf(cur.len), trending: `${cur.len} in a row — Mirror Opposite → ${oppLabel} INEVITABLE`, type: 'EXTREME' };
+    }
+
+    // === LONG STREAK (8-12) — very high reversal probability ===
+    if (cur.len >= 8) {
+      return { name: `🔴 Long Streak (${cur.len}× ${label})`, prediction: opp, confidence: getAdaptiveStreakConf(cur.len), trending: `${cur.len} consecutive — long streak, very high reversal`, type: 'LONG' };
+    }
+
+    // === SEVEN STREAK — extended, reversal imminent ===
+    if (cur.len === 7) {
+      return { name: `Seven Streak (${label})`, prediction: opp, confidence: getAdaptiveStreakConf(7), trending: `7 in a row — extended streak, reversal imminent`, type: 'SEVEN' };
+    }
+
+    // === SIX STREAK — flip zone ===
+    if (cur.len === 6) {
+      return { name: `Six Streak (${label})`, prediction: opp, confidence: getAdaptiveStreakConf(6), trending: `6 in a row — flip zone, ${oppLabel} expected`, type: 'SIX' };
+    }
+
+    // === FIVE STREAK — strong flip signal ===
+    if (cur.len === 5) {
+      return { name: `Five Streak (${label})`, prediction: opp, confidence: getAdaptiveStreakConf(5), trending: `5 in a row — strong flip signal → ${oppLabel}`, type: 'FIVE' };
+    }
+
+    // === EXPANSION (B→S→B→S) ===
+    const expansion = detectExpansion(runs);
+    if (expansion) return expansion;
+
+    // === THREE-IN-ONE (BBB→SSS→BBB) ===
+    if (runs.length >= 2 && runLens.slice(0, 2).every(l => l === 3)) {
+      const next = cur.len >= 3 ? opp : cur.val;
+      return { name: `Three-in-One (${label}→${oppLabel})`, prediction: next, confidence: 0.81, trending: `Triple blocks alternating — Three-in-One cycle`, type: 'THREE_IN_ONE' };
+    }
+
+    // === TWO-IN-ONE (BB→SS→BB) ===
+    if (runs.length >= 3 && runLens.slice(0, 3).every(l => l === 2)) {
+      const next = cur.len >= 2 ? opp : cur.val;
+      return { name: `Two-in-One (${label}→${oppLabel})`, prediction: next, confidence: 0.80, trending: `Pair alternation — Two-in-One cycle`, type: 'TWO_IN_ONE' };
+    }
+
+    // === QUADRA TREND (4+4) ===
+    if (runs.length >= 2 && runLens.slice(0, 2).every(l => l === 4)) {
+      const next = cur.len >= 4 ? opp : cur.val;
+      return { name: `Quadra Cycle (${label}→${oppLabel})`, prediction: next, confidence: 0.81, trending: `4-block alternating — Quadra Cycle`, type: 'QUADRA' };
+    }
+
+    // === COMPRESSION / EXPANSION RHYTHM ===
+    const compression = detectCompression(runs);
+    if (compression) return compression;
+
+    // === CYCLE CHAIN / MIRROR OPPOSITE ===
+    const chain = detectCycleChain(runs);
+    if (chain) return chain;
+
+    // === SINGLE TREND (pure alternation) ===
+    if (runs.length >= 4 && runLens.slice(0, 4).every(l => l === 1)) {
+      return { name: `Single Trend (S→B→S→B)`, prediction: opp, confidence: 0.80, trending: `Strict alternation — Single Trend, continue flip`, type: 'SINGLE' };
+    }
+
+    // === QUADRA STREAK (4 in a row) ===
+    if (cur.len === 4) {
+      return { name: `Quadra (${cur.val === 'A' ? 'SSSS' : 'BBBB'})`, prediction: opp, confidence: getAdaptiveStreakConf(4), trending: `4 consecutive — Quadra, expect flip`, type: 'QUADRA_STREAK' };
+    }
+
+    // === TRIPLE STREAK (3 in a row) — opposite expected ===
+    if (cur.len === 3) {
+      return { name: `Triple (${cur.val === 'A' ? 'SSS' : 'BBB'})`, prediction: opp, confidence: getAdaptiveStreakConf(3), trending: `3 consecutive — Triple, expect ${oppLabel}`, type: 'TRIPLE' };
+    }
+
+    // === DOUBLE + Cycle Chain signals ===
+    if (cur.len === 2 && runs.length >= 2) {
+      const prev = runs[1];
+      if (prev.len === 3) {
+        return { name: `Cycle Chain (BBB→${cur.val === 'B' ? 'BB' : 'SS'})`, prediction: opp, confidence: 0.75, trending: `Chain: Triple→Double — reversal next`, type: 'CHAIN' };
+      }
+      return { name: `Double (${cur.val === 'A' ? 'SS' : 'BB'})`, prediction: opp, confidence: 0.70, trending: `2 consecutive — Double, mirror expected`, type: 'DOUBLE' };
+    }
+
+    // === SINGLE + post-streak context ===
+    if (cur.len === 1 && runs.length >= 2) {
+      const prev = runs[1];
+      if (prev.len >= 3) {
+        return { name: `Mirror Opposite (post-${prev.len})`, prediction: cur.val, confidence: 0.72, trending: `After ${prev.len}-streak, one flip seen — continuation likely`, type: 'MIRROR' };
+      }
+    }
+
+    return null;
+  }
+
+  // =====================================================
+  // MULTI-METHOD VOTING ENGINE (6 methods)
+  // =====================================================
+  function detectPattern(abSeq) {
+    if (abSeq.length < 2) return { pattern: 'Insufficient data', next: 'B', confidence: 0.50, trendName: '', trendDir: '', streakLen: 0 };
+
+    const recent = abSeq.slice(0, Math.min(abSeq.length, 100));
+    const runs = runLengthEncode(recent);
+
+    // Current streak length
+    let streakLen = 0;
+    const latestVal = recent[0];
+    for (const v of recent) { if (v === latestVal) streakLen++; else break; }
+
+    // === SHORT-CIRCUIT: Medium/Long/Extreme streaks (≥5) override all methods ===
+    if (streakLen >= 5) {
+      const flip = latestVal === 'A' ? 'B' : 'A';
+      const label = latestVal === 'A' ? 'SMALL' : 'BIG';
+      const flipLabel = flip === 'A' ? 'SMALL' : 'BIG';
+      const conf = getAdaptiveStreakConf(streakLen);
+      const sLabel = getStreakLabel(streakLen);
+      let trendDir = `${streakLen} in a row — FLIP EXPECTED`;
+      if (streakLen >= 13) trendDir = `${streakLen} in a row — Mirror Opposite → ${flipLabel} INEVITABLE`;
+      else if (streakLen >= 10) trendDir = `${streakLen} in a row — extreme reversal zone`;
+      else if (streakLen >= 7) trendDir = `${streakLen} in a row — extended streak, reversal imminent`;
+      const sType = streakLen >= 13 ? 'EXTREME' : streakLen >= 10 ? 'LONG' : streakLen === 7 ? 'SEVEN' : streakLen === 6 ? 'SIX' : 'FIVE';
+      return {
+        pattern: `🚨 ${sLabel}: ${streakLen}× ${label}`,
+        next: flip,
+        confidence: conf,
+        trendName: `${sLabel} Alert (${streakLen}× ${label})`,
+        trendDir,
+        streakLen,
+        family: 'Streak',
+        activeType: sType
+      };
+    }
+
+    const votes = { A: 0, B: 0 };
+    let topPattern = null, topScore = 0;
+    let trendName = '', trendDir = '';
+
+    // === METHOD 1: Cycle pattern matching ===
+    for (const cp of CYCLE_PATTERNS) {
+      const res = matchCycle(recent, cp.cycle);
+      if (res.match) {
+        const w = cp.weight * res.score * 2.2;
+        votes[res.nextPred] = (votes[res.nextPred] || 0) + w;
+        if (res.score * cp.weight > topScore) { topScore = res.score * cp.weight; topPattern = { name: cp.name, conf: cp.weight * res.score }; }
+      }
+    }
+
+    // === METHOD 2: Adaptive streak confidence (streakLen 3-4) ===
+    if (streakLen >= 3) {
+      const streakPred = latestVal === 'A' ? 'B' : 'A';
+      const adaptConf = getAdaptiveStreakConf(streakLen);
+      const streakW = adaptConf * 2.5;
+      votes[streakPred] = (votes[streakPred] || 0) + streakW;
+      const sn = `${getStreakLabel(streakLen)}: ${streakLen}× ${latestVal === 'A' ? 'SMALL' : 'BIG'}`;
+      if (!topPattern || adaptConf > topPattern.conf) { topPattern = { name: sn, conf: adaptConf }; topScore = adaptConf; }
+    }
+
+    // === METHOD 3: Full trend detection (all rhythm/chain/streak patterns) ===
+    const trend = detectTrend(recent);
+    if (trend) {
+      const tw = trend.confidence * 1.8;
+      votes[trend.prediction] = (votes[trend.prediction] || 0) + tw;
+      trendName = trend.name;
+      trendDir = trend.trending;
+    }
+
+    // === METHOD 4: Weighted probability (mean reversion on imbalance) ===
+    const histBias = getWeightedHistoryBias(recent);
+    if (histBias.pred) {
+      votes[histBias.pred] = (votes[histBias.pred] || 0) + histBias.weight;
+    }
+
+    // === METHOD 5: Compression / Expansion rhythm votes ===
+    if (runs.length >= 4) {
+      const expansion = detectExpansion(runs);
+      if (expansion) {
+        votes[expansion.prediction] = (votes[expansion.prediction] || 0) + expansion.confidence * 1.5;
+        if (!trendName) { trendName = expansion.name; trendDir = expansion.trending; }
+      }
+      const compression = detectCompression(runs);
+      if (compression) {
+        votes[compression.prediction] = (votes[compression.prediction] || 0) + compression.confidence * 1.5;
+        if (!trendName) { trendName = compression.name; trendDir = compression.trending; }
+      }
+    }
+
+    // === METHOD 6: Recency weighted vote (last 10, mean reversion) ===
+    const win = recent.slice(0, 10);
+    const aC = win.filter(v => v === 'A').length;
+    const bC = win.length - aC;
+    const recPred = aC > bC ? 'B' : 'A';
+    const recConf = Math.max(aC, bC) / win.length * 0.55;
+    votes[recPred] = (votes[recPred] || 0) + recConf;
+
+    // === METHOD 7: Ladder / Pyramid / Diamond rhythm ===
+    const ladderR = detectLadder(runs);
+    if (ladderR) { votes[ladderR.prediction] = (votes[ladderR.prediction]||0) + ladderR.confidence * 1.4; if (!trendName) { trendName = ladderR.name; trendDir = ladderR.trending; } }
+    const pyramidR = detectPyramid(runs);
+    if (pyramidR) { votes[pyramidR.prediction] = (votes[pyramidR.prediction]||0) + pyramidR.confidence * 1.4; if (!trendName) { trendName = pyramidR.name; trendDir = pyramidR.trending; } }
+
+    // === METHOD 8: Hot/Cold Bias ===
+    const hotCold = detectHotColdBias(recent);
+    if (hotCold) { votes[hotCold.prediction] = (votes[hotCold.prediction]||0) + hotCold.confidence * 1.3; if (!trendName) { trendName = hotCold.name; trendDir = hotCold.trending; } }
+
+    // === METHOD 9: Gap Analysis + Threshold Trigger ===
+    const gapR = detectGapPattern(recent);
+    if (gapR) { votes[gapR.prediction] = (votes[gapR.prediction]||0) + gapR.confidence * 1.7; if (!trendName) { trendName = gapR.name; trendDir = gapR.trending; } if (!topPattern || gapR.confidence > topPattern.conf) { topPattern = { name: gapR.name, conf: gapR.confidence }; } }
+    const threshR = detectThresholdTrigger(recent);
+    if (threshR) { votes[threshR.prediction] = (votes[threshR.prediction]||0) + threshR.confidence * 1.2; if (!trendName) { trendName = threshR.name; trendDir = threshR.trending; } }
+
+    // === METHOD 10: Modulo Cycle + Echo Pattern (PRNG fingerprints) ===
+    const moduloR = detectModuloCycle(recent);
+    if (moduloR) { votes[moduloR.prediction] = (votes[moduloR.prediction]||0) + moduloR.confidence * 1.6; if (!trendName) { trendName = moduloR.name; trendDir = moduloR.trending; } if (!topPattern || moduloR.confidence > topPattern.conf) { topPattern = { name: moduloR.name, conf: moduloR.confidence }; } }
+    const echoR = detectEchoPattern(recent);
+    if (echoR) { votes[echoR.prediction] = (votes[echoR.prediction]||0) + echoR.confidence * 1.4; if (!trendName) { trendName = echoR.name; trendDir = echoR.trending; } }
+
+    // === METHOD 11: Snake Run + Fractal Chain ===
+    const snakeR = detectSnakeRun(runs);
+    if (snakeR) { votes[snakeR.prediction] = (votes[snakeR.prediction]||0) + snakeR.confidence * 1.3; if (!trendName) { trendName = snakeR.name; trendDir = snakeR.trending; } }
+    const fractalR = detectFractalChain(recent);
+    if (fractalR) { votes[fractalR.prediction] = (votes[fractalR.prediction]||0) + fractalR.confidence * 1.2; if (!trendName) { trendName = fractalR.name; trendDir = fractalR.trending; } }
+
+    // === METHOD 12: Long-term PRNG Cycle Detection (cached) ===
+    const prngR = detectPRNGCycleCached();
+    if (prngR) { votes[prngR.prediction] = (votes[prngR.prediction]||0) + prngR.confidence * 1.8; if (!topPattern || prngR.confidence > topPattern.conf) { topPattern = { name: prngR.name, conf: prngR.confidence }; } if (!trendName) { trendName = prngR.name; trendDir = prngR.trending; } }
+
+    // === METHOD 13: Waveform rhythm ===
+    const waveR = detectWaveform(runs);
+    if (waveR) { votes[waveR.prediction] = (votes[waveR.prediction]||0) + waveR.confidence * 1.3; if (!trendName) { trendName = waveR.name; trendDir = waveR.trending; } }
+
+    // === METHOD 14: Spiral rhythm ===
+    const spiralR = detectSpiral(runs);
+    if (spiralR) { votes[spiralR.prediction] = (votes[spiralR.prediction]||0) + spiralR.confidence * 1.3; if (!trendName) { trendName = spiralR.name; trendDir = spiralR.trending; } }
+
+    // === METHOD 15: Parity Chain (odd/even of game numbers) ===
+    const parityR = detectParityChain(liveHistory);
+    if (parityR) { votes[parityR.prediction] = (votes[parityR.prediction]||0) + parityR.confidence * 1.2; if (!trendName) { trendName = parityR.name; trendDir = parityR.trending; } }
+
+    // === FINAL DECISION ===
+    const finalPred = (votes['A'] || 0) >= (votes['B'] || 0) ? 'A' : 'B';
+    const totalV = (votes['A'] || 0) + (votes['B'] || 0);
+    const rawConf = totalV > 0 ? (votes[finalPred] || 0) / totalV : 0.55;
+    const finalConf = Math.min(0.94, Math.max(0.54, rawConf * 0.80 + 0.14));
+
+    // Determine pattern family + active type for display/alerts
+    let family = 'Alternation';
+    let activeType = 'NEUTRAL';
+    const activeResults = [prngR, moduloR, echoR, fractalR, hotCold, gapR, threshR, ladderR, pyramidR, snakeR, waveR, spiralR, parityR, trend].filter(Boolean);
+    const topResult = activeResults.find(r => r && r.confidence >= 0.70);
+    if (topResult?.family) family = topResult.family;
+    if (topResult?.type) activeType = topResult.type;
+    if (trend?.type && activeType === 'NEUTRAL') {
+      const t = trend.type;
+      activeType = t;
+      if (['EXTREME','LONG','SEVEN','SIX','FIVE','TRIPLE','DOUBLE','SINGLE','QUADRA_STREAK'].includes(t)) family = 'Streak';
+      else if (['TWO_IN_ONE','THREE_IN_ONE','QUADRA','EXPANSION'].includes(t)) family = 'Alternation';
+      else if (['MIRROR','CHAIN'].includes(t)) family = 'Reversal';
+      else if (['COMPRESSION','COMPRESSION_SWITCH'].includes(t)) family = 'Rhythm';
+    }
+    if (activeType === 'NEUTRAL' && streakLen > 0) {
+      activeType = streakLen >= 4 ? 'QUADRA_STREAK' : streakLen === 3 ? 'TRIPLE' : streakLen === 2 ? 'DOUBLE' : 'SINGLE';
+      if (streakLen >= 3) family = 'Streak';
+    }
+
+    const patternName = topPattern ? topPattern.name : 'Recency weighted';
+    return { pattern: patternName, next: finalPred, confidence: finalConf, trendName, trendDir, streakLen, family, activeType };
+  }
+
   function predictNumberMatchingResult(history, targetResult) {
-    if (history.length === 0) return targetResult === 'BIG' ? 7 : 2;
+    if (history.length === 0) return { number: targetResult === 'BIG' ? 7 : 2, conf: 0.55 };
     let scores = Array(10).fill(0), totalWeight = 0;
-    for (let i = 0; i < Math.min(history.length, 30); i++) {
+    for (let i = 0; i < Math.min(history.length, 100); i++) {
       let weight = Math.pow(0.88, i);
       scores[history[i].number] += weight;
       totalWeight += weight;
     }
-    if (history[0]) scores[history[0].number] *= 0.45;
+    if (history[0]) scores[history[0].number] *= 0.40;
     let candidates = targetResult === 'BIG' ? [5,6,7,8,9] : [0,1,2,3,4];
     let bestNum = candidates[0], bestScore = -1;
     for (let num of candidates) if (scores[num] > bestScore) { bestScore = scores[num]; bestNum = num; }
     let confidence = totalWeight > 0 ? bestScore / totalWeight : 0.55;
     return { number: bestNum, conf: Math.min(0.86, confidence + 0.12) };
   }
+  let lastFamily = 'Alternation';
+
   function generateStablePrediction() {
     if (liveHistory.length === 0) {
-      currentPrediction = 'BIG'; currentPredictedNumber = 7; lastPatternName = "Initializing"; lastConfidence = 0.52;
+      currentPrediction = 'BIG'; currentPredictedNumber = 7; lastPatternName = "Initializing"; lastConfidence = 0.52; lastTrendName = ''; lastTrendDir = ''; lastFamily = 'Alternation';
       return;
     }
     const abSeq = convertToAB(liveHistory);
     const patternResult = detectPattern(abSeq);
-    let predictedResult = patternResult.next === 'A' ? 'SMALL' : 'BIG';
-    let patternConf = patternResult.confidence;
+    const predictedResult = patternResult.next === 'A' ? 'SMALL' : 'BIG';
     const numPred = predictNumberMatchingResult(liveHistory, predictedResult);
-    let predictedNumber = numPred.number, numConf = numPred.conf;
-    let overallConf = (patternConf + numConf) / 2;
-    overallConf = Math.min(0.94, Math.max(0.53, overallConf));
+    const overallConf = Math.min(0.94, Math.max(0.54, (patternResult.confidence + numPred.conf) / 2));
     currentPrediction = predictedResult;
-    currentPredictedNumber = predictedNumber;
+    currentPredictedNumber = numPred.number;
     lastPatternName = patternResult.pattern;
     lastConfidence = overallConf;
+    lastTrendName = patternResult.trendName;
+    lastTrendDir = patternResult.trendDir;
+    lastStreakLen = patternResult.streakLen || 0;
+    lastFamily = patternResult.family || 'Alternation';
+    lastPatternType = patternResult.activeType || '';
+    lastAlert = getPatternAlert(lastPatternType || 'NEUTRAL', {
+      streakLen: patternResult.streakLen || 0,
+      streakSide: liveHistory[0]?.result || '',
+      prediction: patternResult.next
+    });
+    lastMomentum = getMomentumBias(abSeq, patternResult.streakLen || 0);
   }
   function updateUIWithCurrentPrediction() {
     if (!currentPrediction) return;
     const bigCount = liveHistory.filter(r => r.result === 'BIG').length;
     const smallCount = liveHistory.length - bigCount;
-    document.getElementById('bigStat').innerText = bigCount;
-    document.getElementById('smallStat').innerText = smallCount;
+    domSet('bigStat','innerText',bigCount);
+    domSet('smallStat','innerText',smallCount);
     const confPercent = Math.floor(lastConfidence * 100);
-    document.getElementById('confStat').innerText = `${confPercent}%`;
-    document.getElementById('confidenceFill').style.width = `${confPercent}%`;
+    domSet('confStat','innerText',confPercent+'%');
+    domStyle('confidenceFill','width',confPercent+'%');
     const displayData = getNumberDisplayData(currentPredictedNumber);
     let dotHtml = '';
     if (displayData.dual) {
@@ -657,17 +1499,55 @@
         <div class="prediction-number ${displayData.textClass}">${currentPredictedNumber}</div>
       </div>
     `;
-    document.getElementById('trendName').innerHTML = `🎯 ${currentPrediction} · Predicted ${currentPredictedNumber}`;
+    const familyColors = {
+      'Streak':'#ff8866','Alternation':'#66ccff','Reversal':'#ffaa44','Rhythm':'#88ff99',
+      'Probability':'#cc99ff','Meta-Pattern':'#ffdd55','Cycle Detection':'#ff66cc','Cycle':'#ff66cc'
+    };
+    const famColor = familyColors[lastFamily] || '#aaa';
+    const famBadge = `<span style="font-size:9px;font-weight:700;letter-spacing:1px;background:${famColor}22;color:${famColor};border:1px solid ${famColor}55;border-radius:6px;padding:1px 6px;vertical-align:middle;text-transform:uppercase;">${lastFamily}</span>`;
+    document.getElementById('trendName').innerHTML = `🎯 ${currentPrediction} · #${currentPredictedNumber} &nbsp;${famBadge}&nbsp;<span style="font-size:0.72em;opacity:0.75;">${lastPatternName}</span>`;
     const lastActual = liveHistory[0] ? `${liveHistory[0].result} ${liveHistory[0].number}` : 'none';
-    document.getElementById('trendDesc').innerHTML = `🧠 ${lastPatternName} | ${liveHistory.length} rounds | Last: ${lastActual}`;
-    document.getElementById('futurePeriodDisplay').innerText = getNextPeriod();
+    // Human-friendly alert as the main description
+    const alertMsg = lastAlert || lastPatternName;
+    const momentumTag = lastMomentum === 'momentum'
+      ? ` <span style="background:rgba(100,255,120,0.15);color:#88ff99;border:1px solid #88ff9966;border-radius:5px;font-size:9px;font-weight:700;padding:1px 6px;letter-spacing:0.8px;margin-left:4px;">⚡ MOMENTUM</span>`
+      : lastMomentum === 'reversal'
+      ? ` <span style="background:rgba(255,100,80,0.15);color:#ff8866;border:1px solid #ff886666;border-radius:5px;font-size:9px;font-weight:700;padding:1px 6px;letter-spacing:0.8px;margin-left:4px;">🔄 FLIP ZONE</span>`
+      : lastMomentum === 'watch'
+      ? ` <span style="background:rgba(255,200,60,0.15);color:#ffcc66;border:1px solid #ffcc6666;border-radius:5px;font-size:9px;font-weight:700;padding:1px 6px;letter-spacing:0.8px;margin-left:4px;">⚠️ WATCH</span>`
+      : '';
+    document.getElementById('trendDesc').innerHTML = `${alertMsg}${momentumTag} <span style="opacity:0.4;font-size:0.8em;">| ${liveHistory.length} rounds | Last: ${lastActual}</span>`;
+    // Streak alert banner — fires at 3+, human-friendly language
+    const alertEl = document.getElementById('streakAlert');
+    const alertText = document.getElementById('streakAlertText');
+    if (lastStreakLen >= 3) {
+      const streakSide = liveHistory[0]?.result || '';
+      let color, icon;
+      if      (lastStreakLen >= 13) { icon = '⚡'; color = '#ff4444'; }
+      else if (lastStreakLen >= 10) { icon = '🔴'; color = '#ff6633'; }
+      else if (lastStreakLen >= 8)  { icon = '🔴'; color = '#ff7744'; }
+      else if (lastStreakLen >= 6)  { icon = '⚠️'; color = '#ffaa44'; }
+      else if (lastStreakLen >= 5)  { icon = '⚠️'; color = '#ffbb55'; }
+      else if (lastStreakLen >= 4)  { icon = '📊'; color = '#ffcc66'; }
+      else                          { icon = '📊'; color = '#ffdd88'; }
+      const humanMsg = getPatternAlert(lastPatternType || 'TRIPLE', {
+        streakLen: lastStreakLen, streakSide,
+        prediction: currentPrediction === 'BIG' ? 'B' : 'A'
+      });
+      alertEl.style.borderColor = color + '88';
+      alertEl.style.display = 'block';
+      alertText.innerHTML = `${icon} ${lastStreakLen}× ${streakSide} &nbsp;·&nbsp; <span style="color:${color}dd;">${humanMsg}</span>`;
+    } else {
+      alertEl.style.display = 'none';
+    }
+    domSet('futurePeriodDisplay','innerText',getNextPeriod());
   }
   function updateUIDefault() {
-    document.getElementById('bigStat').innerText = '0'; document.getElementById('smallStat').innerText = '0';
-    document.getElementById('confStat').innerText = '0%'; document.getElementById('confidenceFill').style.width = '0%';
-    document.getElementById('predictionArea').innerHTML = '<div class="prediction-row">---</div>';
-    document.getElementById('trendName').innerHTML = '📊 AWAITING DATA';
-    document.getElementById('futurePeriodDisplay').innerText = '----';
+    domSet('bigStat','innerText','0'); domSet('smallStat','innerText','0');
+    domSet('confStat','innerText','0%'); domStyle('confidenceFill','width','0%');
+    domSet('predictionArea','innerHTML','<div class="prediction-row">---</div>');
+    domSet('trendName','innerHTML','📊 AWAITING DATA');
+    domSet('futurePeriodDisplay','innerText','----');
   }
   function onNewRoundData() {
     if (liveHistory.length > 0 && currentPrediction) {
@@ -682,47 +1562,366 @@
     generateStablePrediction();
     updateUIWithCurrentPrediction();
   }
-  async function fetchLiveData() {
+  // ── Browser-side bulk history loader (uses game session cookies, CORS: *) ──
+  let bulkLoaded = false;
+
+  function setBulkStatus(msg, progress, done) {
+    const bar  = document.getElementById('bulkLoadBar');
+    const text = document.getElementById('bulkLoadText');
+    const pct  = document.getElementById('bulkLoadPct');
+    const fill = document.getElementById('bulkLoadFill');
+    if (!bar) return;
+    if (done) { bar.style.display = 'none'; return; }
+    bar.style.display = 'block';
+    if (text) text.textContent = msg;
+    if (progress !== undefined) {
+      const p = Math.min(100, Math.round(progress * 100));
+      if (pct)  pct.textContent  = p + '%';
+      if (fill) fill.style.width = p + '%';
+    }
+  }
+
+  async function fetchBulkHistory() {
+    if (bulkLoaded) return;
+    bulkLoaded = true;
+    setBulkStatus('📥 Loading history…', 0);
     try {
-      const res = await fetch(FIXED_API_URL);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetch('/api/wingo/bulk?pages=20');
       const data = await res.json();
-      if (!data.success) throw new Error(data.error);
-      const newHistory = data.history || [];
+      if (!data.success || !Array.isArray(data.history)) { setBulkStatus('', 1, true); return; }
       const existingSet = new Set(liveHistory.map(h => h.period));
       let added = 0;
-      for (const item of newHistory) {
-        if (item.period && !existingSet.has(item.period) && typeof item.number !== 'undefined') {
-          let finalResult = item.result || getResultFromNumber(item.number);
-          liveHistory.unshift({ period: String(item.period), number: item.number, result: finalResult });
+      for (const item of data.history) {
+        if (item.period && !existingSet.has(item.period)) {
+          liveHistory.push(item);
           existingSet.add(item.period);
           added++;
         }
       }
       if (added > 0) {
-        liveHistory.sort((a,b) => String(b.period).localeCompare(String(a.period)));
+        liveHistory.sort((a, b) => String(b.period).localeCompare(String(a.period)));
+        if (liveHistory.length > 500) liveHistory = liveHistory.slice(0, 500);
+        saveLiveHistory();
+        renderLiveTable();
+        generateStablePrediction();
+        updateUIWithCurrentPrediction();
+      }
+    } catch(e) { console.warn('fetchBulkHistory error:', e); }
+    setBulkStatus('', 1, true);
+  }
+
+  let fetchInterval = null;
+  let lastRoundTimestamp = null;   // when we DETECTED the current period start
+  let roundDuration = 30000;       // 30 seconds per WinGo 30S round
+  let nextRoundTimer  = null;   // setTimeout handle for next round
+  let fastPollActive  = false;  // controls the non-blocking poll chain
+  let isFetching      = false;  // prevents concurrent in-flight fetches
+  let serverMidnightEst = null; // self-calibrating: estimated server day-boundary (ms)
+
+  // ── Self-calibrating server clock ──────────────────────────────────────────
+  // Called every time we detect a new result. Learns the server's round grid.
+  function calibrateServerClock(period, detectedAt) {
+    if (!period || String(period).length < 17) return;
+    const rNum = parseInt(String(period).slice(8), 10);
+    if (!rNum || isNaN(rNum)) return;
+    // Round N ended roughly 300ms before we detected it (network + publish lag)
+    const est = (detectedAt - 300) - rNum * 30000;
+    serverMidnightEst = serverMidnightEst === null
+      ? est
+      : serverMidnightEst * 0.85 + est * 0.15; // EMA — smoothes out variance
+  }
+
+  // ── Period-based: ms until we should start the early-poll window ───────────
+  // Fires 5 s before round end so we catch the result the moment it's published.
+  const EARLY_WINDOW_MS = 5000;
+  function msUntilNextFetch() {
+    if (serverMidnightEst !== null && liveHistory.length > 0) {
+      const period = String(liveHistory[0].period);
+      if (period.length >= 17) {
+        const rNum = parseInt(period.slice(8), 10);
+        if (rNum && !isNaN(rNum)) {
+          const nextRoundEnd = serverMidnightEst + (rNum + 1) * 30000;
+          return Math.max(200, nextRoundEnd - Date.now() - EARLY_WINDOW_MS);
+        }
+      }
+    }
+    if (!lastRoundTimestamp) return 25000;
+    return Math.max(200, lastRoundTimestamp + roundDuration - Date.now() - EARLY_WINDOW_MS);
+  }
+
+  // ── Early-result checker — hits the lightweight /api/wingo/early endpoint ──
+  // Returns true when a new period is detected so we can trigger a full fetch.
+  let isEarlyFetching = false;
+  async function checkEarlyResult() {
+    if (isEarlyFetching) return false;
+    isEarlyFetching = true;
+    try {
+      const res = await fetch('/api/wingo/early');
+      const data = await res.json();
+      if (!data.success || !data.latest) return false;
+      const latestPeriod = data.latest.period;
+      if (latestPeriod && liveHistory.length > 0 && latestPeriod !== liveHistory[0].period) {
+        return true; // new round detected early
+      }
+      if (latestPeriod && liveHistory.length === 0) return true;
+      return false;
+    } catch(e) { return false; }
+    finally { isEarlyFetching = false; }
+  }
+
+  // ── Non-blocking poll chain — polls early endpoint at 200ms, then full fetch ─
+  async function doFastPoll() {
+    if (!fastPollActive) return;
+    const newRound = await checkEarlyResult();
+    if (newRound) {
+      fastPollActive = false;
+      await fetchLiveData();
+    } else {
+      if (fastPollActive) setTimeout(doFastPoll, 100);
+    }
+  }
+
+  function scheduleNextRoundFetch() {
+    if (nextRoundTimer) { clearTimeout(nextRoundTimer); nextRoundTimer = null; }
+    fastPollActive = false;
+    const delay = msUntilNextFetch();
+    nextRoundTimer = setTimeout(() => {
+      nextRoundTimer = null;
+      fastPollActive = true;
+      doFastPoll();
+    }, delay);
+  }
+
+  async function fetchLiveData() {
+    if (isFetching) return;
+    isFetching = true;
+    try {
+      const res = await fetch('/api/wingo');
+      const data = await res.json();
+      if (!data.success || !Array.isArray(data.history)) return;
+
+      const existingSet = new Set(liveHistory.map(h => h.period));
+      let added = 0;
+      for (const item of data.history) {
+        if (!existingSet.has(item.period)) {
+          liveHistory.unshift(item);
+          existingSet.add(item.period);
+          added++;
+        }
+      }
+      if (added > 0) {
+        // Calibrate server clock BEFORE setting lastRoundTimestamp
+        calibrateServerClock(liveHistory[0]?.period, Date.now());
+        lastRoundTimestamp = Date.now();
+        fastPollActive = false; // stop the fast poll chain
+        liveHistory.sort((a, b) => String(b.period).localeCompare(String(a.period)));
+        if (liveHistory.length > 500) liveHistory = liveHistory.slice(0, 500);
         saveLiveHistory();
         renderLiveTable();
         onNewRoundData();
+        scheduleNextRoundFetch();
       }
-    } catch (err) { console.warn('Fetch error:', err); }
-  }
-  function startTimerLoop() {
-    function tick() {
-      if (!roundSyncActive) { if (animationFrame) cancelAnimationFrame(animationFrame); return; }
-      const now = new Date(), ms = now.getMilliseconds(), sec = now.getSeconds();
-      let remaining = sec < 30 ? 30 - sec - ms/1000 : 60 - sec - ms/1000;
-      if (remaining < 0) remaining = 0;
-      const timerElem = document.getElementById('roundTimerDisplay');
-      if (timerElem) { timerElem.innerText = `${Math.ceil(remaining)}s`; timerElem.style.color = remaining <= 3 ? '#ff8866' : '#ffcc88'; }
-      if ((sec === 0 || sec === 30) && ms < 80) { if (lastTriggeredSecond !== sec) { lastTriggeredSecond = sec; fetchLiveData(); } } 
-      else if (sec !== 0 && sec !== 30) lastTriggeredSecond = -1;
-      animationFrame = requestAnimationFrame(tick);
+    } catch (e) {
+      console.warn('fetchLiveData error:', e);
+    } finally {
+      isFetching = false;
     }
-    if (animationFrame) cancelAnimationFrame(animationFrame);
-    animationFrame = requestAnimationFrame(tick);
   }
-  function startAutoSync() { if (roundSyncActive) return; roundSyncActive = true; fetchLiveData(); startTimerLoop(); }
+
+  // ── Increment period string by 1 (handles zero-padded numeric suffixes) ──
+  function incrementPeriod(period) {
+    if (!period || period === '----') return '----';
+    const s = String(period);
+    // Format: 20260609NNNNNN  (date prefix + sequential number)
+    const match = s.match(/^(\d{8})(\d+)$/);
+    if (match) {
+      const prefix = match[1];
+      const numStr = match[2];
+      const next = (parseInt(numStr, 10) + 1).toString().padStart(numStr.length, '0');
+      return prefix + next;
+    }
+    // Generic: increment trailing digits
+    const m = s.match(/(.*?)(\d+)$/);
+    if (m) {
+      const next = (parseInt(m[2], 10) + 1).toString().padStart(m[2].length, '0');
+      return m[1] + next;
+    }
+    return s + '+1';
+  }
+
+
+  // ── Early-result engine: poll 200 ms from 6 s before round ends ──
+  let earlyPollActive  = false;
+  let earlyPollTimer   = null;
+  let earlyShownPeriod = null;   // period we already showed early result for
+
+  function startEarlyPoll() {
+    if (earlyPollActive) return;
+    if (!gameStatePeriod) return;
+    if (earlyShownPeriod === gameStatePeriod) return;  // already done this round
+    earlyPollActive = true;
+    // Auto-stop after 12 s (safety net)
+    setTimeout(() => { if (earlyPollActive) { earlyPollActive = false; } }, 12000);
+    runEarlyPoll();
+  }
+
+  function stopEarlyPoll() {
+    earlyPollActive = false;
+    if (earlyPollTimer) { clearTimeout(earlyPollTimer); earlyPollTimer = null; }
+  }
+
+  async function runEarlyPoll() {
+    if (!earlyPollActive) return;
+    try {
+      const res  = await fetch('/api/wingo/early');
+      const data = await res.json();
+      if (data.success && data.latest) {
+        const item = data.latest;
+        // Result is ready when it matches the period we are/were tracking
+        const alreadyInHistory = liveHistory.find(h => h.period === item.period);
+        if (!alreadyInHistory) {
+          earlyPollActive  = false;
+          earlyShownPeriod = item.period;
+          showEarlyResult(item);
+          return;
+        }
+      }
+    } catch(e) {}
+    if (earlyPollActive) earlyPollTimer = setTimeout(runEarlyPoll, 100);
+  }
+
+  function showEarlyResult(item) {
+    // 1. Prepend to live history so predictions update immediately
+    liveHistory.unshift(item);
+    saveLiveHistory();
+    renderLiveTable();   // update Live Data tab immediately
+    onNewRoundData();
+    // Also sync full history from server in background
+    fetchLiveData();
+
+    // 2. Flash the banner
+    const isBig = item.result === 'BIG';
+    const accent = isBig ? '#ff7744' : '#44aaff';
+    const bg     = isBig
+      ? 'linear-gradient(135deg,rgba(255,80,30,0.32),rgba(255,150,50,0.22))'
+      : 'linear-gradient(135deg,rgba(30,100,255,0.32),rgba(60,180,255,0.22))';
+    const banner = document.getElementById('earlyResultBanner');
+    if (!banner) return;
+    banner.style.cssText += `;background:${bg};border-color:${accent}88;`;
+    banner.innerHTML = `⚡ EARLY RESULT &nbsp;·&nbsp; <span style="color:${accent};font-size:1.18em;letter-spacing:1px;">${item.result}</span> &nbsp;<span style="opacity:0.45;font-size:0.82em;">#${item.number}</span>`;
+    banner.style.display  = 'block';
+    banner.style.opacity  = '1';
+    banner.style.animation = 'earlyFlash 0.5s ease-out';
+    // Fade out after 5 s
+    setTimeout(() => { if (banner) banner.style.opacity = '0.35'; }, 4500);
+    setTimeout(() => { if (banner) { banner.style.display = 'none'; banner.style.opacity = '1'; banner.style.animation = ''; } }, 6000);
+  }
+
+  // ── Real game-state timer (interpolated, floor-rounded to match game) ──
+  let gameRemainMs   = null;   // ms remaining as reported by server
+  let gameRemainAt   = null;   // Date.now() when that report arrived
+  let gameStatePeriod = null;  // current game period from server
+  let stateInterval  = null;   // server poll handle
+  let tickHandle     = null;   // display interval handle
+
+  function renderTimer() {
+    if (!roundSyncActive) return;
+    const timerElem = document.getElementById('roundTimerDisplay');
+    if (!timerElem) return;
+    let displaySec = 0;
+    if (gameRemainMs !== null && gameRemainAt !== null) {
+      const elapsed   = Date.now() - gameRemainAt;
+      const remaining = Math.max(0, gameRemainMs - elapsed);
+      displaySec = Math.floor(remaining / 1000);
+      if (remaining <= 800)  fetchGameState();
+      if (remaining <= 12000 && remaining > 0) startEarlyPoll();
+      if (remaining <= 0)    stopEarlyPoll();
+      // Adaptive state-poll speed: 200ms in last 10s, 1000ms otherwise
+      const wantFast = remaining > 0 && remaining <= 10000;
+      if (wantFast && stateInterval && stateInterval._fastMode !== true) {
+        clearInterval(stateInterval);
+        stateInterval = setInterval(fetchGameState, 200);
+        stateInterval._fastMode = true;
+      } else if (!wantFast && stateInterval && stateInterval._fastMode === true) {
+        clearInterval(stateInterval);
+        stateInterval = setInterval(fetchGameState, 1000);
+        stateInterval._fastMode = false;
+      }
+    }
+    timerElem.innerText     = displaySec + 's';
+    timerElem.style.color   = displaySec <= 5 ? '#ff4444' : displaySec <= 10 ? '#ff8866' : '#ffcc88';
+    timerElem.style.opacity = displaySec <= 3 ? '0.7' : '1';
+  }
+
+  async function fetchGameState() {
+    try {
+      const res  = await fetch('/api/wingo/state');
+      const data = await res.json();
+      if (!data.success) return;
+
+      // Anchor remaining time to THIS browser clock moment
+      gameRemainMs = data.remainTime * 1000;
+      gameRemainAt = Date.now();
+
+      // Period display
+      const period = data.issueNumber;
+      if (period && period.length > 4 && period !== gameStatePeriod) {
+        gameStatePeriod = period;
+        domSet('futurePeriodDisplay', 'innerText', period);
+
+        // ── INSTANT result: use previous field from state response ──────────
+        // data.previous is the just-finished round — no extra API call needed
+        if (data.previous && data.previous.period) {
+          const prev = data.previous;
+          const alreadyHave = liveHistory.find(h => h.period === prev.period);
+          if (!alreadyHave) {
+            liveHistory.unshift(prev);
+            if (liveHistory.length > 500) liveHistory = liveHistory.slice(0, 500);
+            saveLiveHistory();
+            renderLiveTable();
+            onNewRoundData();
+          }
+        }
+        // Also sync full list from server (fills any gaps)
+        fetchLiveData();
+      }
+    } catch(e) {}
+  }
+
+  function startTimerLoop() {
+    if (tickHandle)     clearInterval(tickHandle);
+    if (stateInterval)  clearInterval(stateInterval);
+    fetchGameState();
+    stateInterval = setInterval(fetchGameState, 1000);
+    tickHandle    = setInterval(renderTimer, 100);   // 100ms refresh = smooth + responsive
+  }
+
+
+
+
+
+  async function startAutoSync() {
+    if (roundSyncActive) return;
+    roundSyncActive = true;
+
+    // 1. Start countdown timer immediately — user sees it right away
+    startTimerLoop();
+
+    // 2. Fetch live data FIRST — predictions appear as soon as this resolves
+    await fetchLiveData();
+
+    // 3. Force UI render with whatever data we have (cached or freshly fetched)
+    if (liveHistory.length > 0) { generateStablePrediction(); updateUIWithCurrentPrediction(); }
+
+    // 4. Bulk-fetch all missed rounds in background (non-blocking)
+    fetchBulkHistory();
+
+    // 4. Safety-net: poll every 3s if no active round timer
+    if (fetchInterval) clearInterval(fetchInterval);
+    fetchInterval = setInterval(() => {
+      if (!nextRoundTimer && !fastPollActive) fetchLiveData();
+    }, 10000);
+  }
   function setupTabs() {
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -746,7 +1945,26 @@
   });
   document.getElementById('minimizeBtn').addEventListener('click', () => {
     const c = document.getElementById('content');
-    c.style.display = c.style.display === 'none' ? 'block' : 'none';
+    const btn = document.getElementById('minimizeBtn');
+    const isHidden = c.style.display === 'none';
+    c.style.display = isHidden ? 'block' : 'none';
+    btn.textContent = isHidden ? '−' : '+';
+  });
+  document.getElementById('resetHistoryBtn').addEventListener('click', () => {
+    predictionHistory = [];
+    localStorage.removeItem('wingo_pred_history_v5');
+    renderHistoryTable();
+    updateHistoryStats();
+  });
+  document.getElementById('resetHistoryBtn').addEventListener('mouseenter', function() {
+    this.style.background = 'rgba(255,80,80,0.13)';
+    this.style.color = 'rgba(255,160,140,0.85)';
+    this.style.borderColor = 'rgba(255,100,80,0.35)';
+  });
+  document.getElementById('resetHistoryBtn').addEventListener('mouseleave', function() {
+    this.style.background = 'rgba(255,255,255,0.06)';
+    this.style.color = 'rgba(255,200,160,0.55)';
+    this.style.borderColor = 'rgba(255,180,120,0.18)';
   });
   loadLiveHistory();
 })();
